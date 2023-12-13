@@ -9,17 +9,17 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func (a *App) Hello(c echo.Context) error {
+func (a *App) About(c echo.Context) error {
 	r := c.Request()
 	h := r.Context().Value(htmx.ContextRequestHeader).(htmx.HxRequestHeader)
 
 	b, _ := json.MarshalIndent(h, "", "\t")
 
 	page := &templates.Page{
-		Title:   "HOME",
+		Title:   "ABOUT",
 		Boosted: h.HxBoosted,
 	}
 
-	components := templates.Hello(page, "Dude!", string(b))
+	components := templates.About(page, page.Title, string(b))
 	return components.Render(context.Background(), c.Response().Writer)
 }

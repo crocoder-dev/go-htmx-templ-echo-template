@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"go-htmx-templ-echo-template/internals/handlers"
 	"log"
 	"os"
 
@@ -17,7 +18,7 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 
-	app := &handlers{
+	app := &handlers.App{
 		HTMX: htmx.New(),
 	}
 
@@ -27,6 +28,7 @@ func main() {
 	e.Use(HtmxMiddleware)
 
 	e.GET("/", app.Hello)
+	e.GET("/about", app.About)
 
 	e.Logger.Fatal(e.Start(":" + os.Getenv("PORT")))
 }

@@ -1,0 +1,8 @@
+package templates
+
+templ About(page *Page, title string, htmxHeaders string) {
+	@Layout(page) {
+		<div>{ title }</div>
+		<pre>{ htmxHeaders }</pre>
+	}
+}
