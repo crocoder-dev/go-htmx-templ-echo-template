@@ -1,0 +1,7 @@
+package templates
+
+templ Table(page *Page, name string, tableList []TableList) {
+	@Layout(page) {
+		<div>Hello, { name }</div>
+	}
+}

@@ -200,7 +200,7 @@ func Navigation(isSignedIn bool) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</a></nav><hr class=\"my-4\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</a></nav>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

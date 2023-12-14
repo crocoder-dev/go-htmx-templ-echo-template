@@ -9,7 +9,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func (a *App) Hello(c echo.Context) error {
+func (a *App) Home(c echo.Context) error {
 	r := c.Request()
 	h := r.Context().Value(htmx.ContextRequestHeader).(htmx.HxRequestHeader)
 
@@ -20,6 +20,6 @@ func (a *App) Hello(c echo.Context) error {
 		Boosted: h.HxBoosted,
 	}
 
-	components := templates.Hello(page, "Dude!", string(b))
+	components := templates.Home(page, "Dude!", string(b))
 	return components.Render(context.Background(), c.Response().Writer)
 }

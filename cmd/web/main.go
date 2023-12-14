@@ -27,8 +27,15 @@ func main() {
 	e.Use(echoMiddleware.Recover())
 	e.Use(HtmxMiddleware)
 
-	e.GET("/", app.Hello)
+	e.GET("/", app.Home)
 	e.GET("/about", app.About)
+
+	e.GET("/create_table_data", app.CreateTableData)
+	e.GET("/read_table_data", app.ReadTableData)
+	e.GET("/update_table_data", app.UpdateTableData)
+	e.GET("/delete_table_data", app.DeleteTableData)
+
+	e.Static("/", "dist")
 
 	e.Logger.Fatal(e.Start(":" + os.Getenv("PORT")))
 }
