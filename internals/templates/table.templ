@@ -1,7 +1,39 @@
 package templates
 
-templ Table(page *Page, name string, tableList []TableList) {
+import (
+	"fmt"
+	"go-htmx-templ-echo-template/internals/types"
+)
+
+templ Table(page *Page, name string, tableList []types.TableItem) {
 	@Layout(page) {
 		<div>Hello, { name }</div>
+		<form hx-post="/create_table_data">
+			<input type="text" name="name" placeholder="Name" />
+			<input type="text" name="age" placeholder="Age" />
+			<input type="text" name="city" placeholder="City" />
+			<input type="text" name="state" placeholder="State" />
+			<input type="submit" value="Add" />
+		</form>
+		<table class="table-auto text-center">
+			<thead>
+				<tr class="border-b-2 border-solid border-gray-200">
+					<th class="p-2">Name</th>
+					<th class="p-2">Age</th>
+					<th class="p-2">City</th>
+					<th class="p-2">State</th>
+				</tr>
+			</thead>
+			<tbody>
+			for _, row := range tableList {
+				<tr class="border-b-2 border-solid border-gray-200">
+					<td class="p-2">{ row.Name }</td>
+					<td class="p-2">{ fmt.Sprint(row.Age) }</td>
+					<td class="p-2">{ row.City }</td>
+					<td class="p-2">{ row.State }</td>
+				</tr>
+			}
+			</tbody>
+		</table>
 	}
 }

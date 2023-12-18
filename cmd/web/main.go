@@ -29,6 +29,7 @@ func main() {
 
 	e.GET("/", app.Home)
 	e.GET("/about", app.About)
+	e.GET("/table", app.Table)
 
 	e.GET("/create_table_data", app.CreateTableData)
 	e.GET("/read_table_data", app.ReadTableData)

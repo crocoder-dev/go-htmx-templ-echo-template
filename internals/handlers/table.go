@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"go-htmx-templ-echo-template/internals/templates"
+	"go-htmx-templ-echo-template/internals/types"
 
 	"net/http"
 
@@ -12,11 +13,19 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-var TableList []TableItem
+var TableList []types.TableItem
 
 func (a *App) Table(c echo.Context) error {
 	r := c.Request()
 	h := r.Context().Value(htmx.ContextRequestHeader).(htmx.HxRequestHeader)
+
+	TableList = append(TableList, types.TableItem{
+		ID:    1,
+		Name:  "Dude",
+		Age:   25,
+		City:  "New York",
+		State: "NY",
+	})
 
 	page := &templates.Page{
 		Title:   "Home",
@@ -28,7 +37,7 @@ func (a *App) Table(c echo.Context) error {
 }
 
 func (a *App) CreateTableData(c echo.Context) error {
-	var newItem TableItem
+	var newItem types.TableItem
 	err := json.NewDecoder(c.Request().Body).Decode(&newItem)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request payload"})
