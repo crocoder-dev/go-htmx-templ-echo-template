@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"go-htmx-templ-echo-template/internals/templates"
 	"go-htmx-templ-echo-template/internals/types"
@@ -18,7 +17,7 @@ var TableList []types.TableItem
 func (a *App) Table(c echo.Context) error {
 	r := c.Request()
 	h := r.Context().Value(htmx.ContextRequestHeader).(htmx.HxRequestHeader)
-
+	TableList = TableList[:0]
 	TableList = append(TableList, types.TableItem{
 		ID:    1,
 		Name:  "Dude",
@@ -32,21 +31,30 @@ func (a *App) Table(c echo.Context) error {
 		Boosted: h.HxBoosted,
 	}
 
-	components := templates.Table(page, "Dude!", TableList)
+	components := templates.Table(page, TableList)
 	return components.Render(context.Background(), c.Response().Writer)
 }
 
 func (a *App) CreateTableData(c echo.Context) error {
-	var newItem types.TableItem
-	err := json.NewDecoder(c.Request().Body).Decode(&newItem)
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request payload"})
+	name := c.FormValue("name")
+	ageStr := c.FormValue("age")
+	city := c.FormValue("city")
+	state := c.FormValue("state")
+
+	ageInt := 0
+	fmt.Sscanf(ageStr, "%d", &ageInt)
+
+	newItem := types.TableItem{
+		ID:    TableList[len(TableList)-1].ID + 1,
+		Name:  name,
+		Age:   ageInt,
+		City:  city,
+		State: state,
 	}
 
-	newItem.ID = len(TableList) + 1
-
 	TableList = append(TableList, newItem)
-	return c.JSON(http.StatusCreated, newItem)
+
+	return c.HTML(http.StatusOK, getTableHtml())
 }
 
 func (a *App) ReadTableData(c echo.Context) error {
@@ -54,47 +62,39 @@ func (a *App) ReadTableData(c echo.Context) error {
 }
 
 func (a *App) UpdateTableData(c echo.Context) error {
-	var partialUpdate map[string]interface{}
-	err := json.NewDecoder(c.Request().Body).Decode(&partialUpdate)
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request payload"})
-	}
-
-	// Get the ID from the request parameters
-	id := c.QueryParam("id")
-	if id == "" {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "ID parameter is missing"})
-	}
-
-	// Convert the ID to an integer
+	// Retrieve form values
+	id := c.FormValue("id")
+	formName := c.FormValue("name")
+	formAgeStr := c.FormValue("age")
+	formCity := c.FormValue("city")
+	formState := c.FormValue("state")
+	// Convert age to int
+	ageInt := 0
+	fmt.Sscanf(formAgeStr, "%d", &ageInt)
+	// Convert ID to int
 	idInt := 0
 	fmt.Sscanf(id, "%d", &idInt)
 
-	// Find the item by ID
 	for i, item := range TableList {
 		if item.ID == idInt {
-			// Update only non-empty fields provided in the request
-			if name, ok := partialUpdate["Name"].(string); ok && name != "" {
-				item.Name = name
+			if formName != "" && formName != item.Name {
+				item.Name = formName
 			}
 
-			if age, ok := partialUpdate["Age"].(float64); ok {
-				item.Age = int(age)
+			if formAgeStr != "" && ageInt != item.Age {
+				item.Age = ageInt
 			}
 
-			if city, ok := partialUpdate["City"].(string); ok && city != "" {
-				item.City = city
+			if formCity != "" && formCity != item.City {
+				item.City = formCity
 			}
 
-			if state, ok := partialUpdate["State"].(string); ok && state != "" {
-				item.State = state
+			if formState != "" && formState != item.State {
+				item.State = formState
 			}
 
-			// Add more cases for other fields as needed
-
-			// Update the item in the list
 			TableList[i] = item
-			return c.JSON(http.StatusOK, item)
+			return c.HTML(http.StatusOK, getTableHtml())
 		}
 	}
 
@@ -103,10 +103,7 @@ func (a *App) UpdateTableData(c echo.Context) error {
 }
 
 func (a *App) DeleteTableData(c echo.Context) error {
-	id := c.QueryParam("id")
-	if id == "" {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "ID parameter is missing"})
-	}
+	id := c.FormValue("id")
 
 	idInt := 0
 	fmt.Sscanf(id, "%d", &idInt)
@@ -119,4 +116,23 @@ func (a *App) DeleteTableData(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusNotFound, map[string]string{"error": "Item not found"})
+}
+
+func getTableHtml() string {
+	html := ""
+
+	for _, row := range TableList {
+		html += fmt.Sprintf(`
+        <tr class="border-b-2 border-solid border-gray-200">
+            <td class="p-2">%d</td> 
+            <td class="p-2">%s</td> 
+            <td class="p-2">%d</td>
+            <td class="p-2">%s</td>
+            <td class="p-2">%s</td>
+        </tr>`,
+			row.ID, row.Name, row.Age, row.City, row.State,
+		)
+	}
+
+	return html
 }

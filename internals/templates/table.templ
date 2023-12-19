@@ -5,28 +5,41 @@ import (
 	"go-htmx-templ-echo-template/internals/types"
 )
 
-templ Table(page *Page, name string, tableList []types.TableItem) {
+templ Table(page *Page, tableList []types.TableItem) {
 	@Layout(page) {
-		<div>Hello, { name }</div>
-		<form hx-post="/create_table_data">
+		<form class="flex" hx-post="/create_table_data" hx-target="#table-body" hx-swap="innherHTML">
 			<input type="text" name="name" placeholder="Name" />
-			<input type="text" name="age" placeholder="Age" />
+			<input type="number" name="age" placeholder="Age" />
 			<input type="text" name="city" placeholder="City" />
 			<input type="text" name="state" placeholder="State" />
 			<input type="submit" value="Add" />
 		</form>
-		<table class="table-auto text-center">
+		<form class="flex" hx-put="/update_table_data" hx-target="#table-body" hx-swap="innherHTML">
+			<input type="number" name="id" placeholder="ID" />
+			<input type="text" name="name" placeholder="Name" />
+			<input type="number" name="age" placeholder="Age" />
+			<input type="text" name="city" placeholder="City" />
+			<input type="text" name="state" placeholder="State" />
+			<input type="submit" value="Update" />
+		</form>
+		<form class="flex" hx-delete="/delete_table_data" hx-target="#table-body" hx-swap="innherHTML">
+			<input type="number" name="id" placeholder="ID" />
+			<input type="submit" value="Delete" />
+		</form>
+		<table id="table" class="table-auto text-center">
 			<thead>
 				<tr class="border-b-2 border-solid border-gray-200">
+					<th class="p-2">ID</th>
 					<th class="p-2">Name</th>
 					<th class="p-2">Age</th>
 					<th class="p-2">City</th>
 					<th class="p-2">State</th>
 				</tr>
 			</thead>
-			<tbody>
+			<tbody id="table-body">
 			for _, row := range tableList {
 				<tr class="border-b-2 border-solid border-gray-200">
+					<td class="p-2">{ fmt.Sprint(row.ID) }</td>
 					<td class="p-2">{ row.Name }</td>
 					<td class="p-2">{ fmt.Sprint(row.Age) }</td>
 					<td class="p-2">{ row.City }</td>

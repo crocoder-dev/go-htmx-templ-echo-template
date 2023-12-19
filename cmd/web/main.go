@@ -31,10 +31,10 @@ func main() {
 	e.GET("/about", app.About)
 	e.GET("/table", app.Table)
 
-	e.GET("/create_table_data", app.CreateTableData)
+	e.POST("/create_table_data", app.CreateTableData)
 	e.GET("/read_table_data", app.ReadTableData)
-	e.GET("/update_table_data", app.UpdateTableData)
-	e.GET("/delete_table_data", app.DeleteTableData)
+	e.PUT("/update_table_data", app.UpdateTableData)
+	e.DELETE("/delete_table_data", app.DeleteTableData)
 
 	e.Static("/", "dist")
 

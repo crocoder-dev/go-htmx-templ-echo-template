@@ -15,7 +15,7 @@ import (
 	"go-htmx-templ-echo-template/internals/types"
 )
 
-func Table(page *Page, name string, tableList []types.TableItem) templ.Component {
+func Table(page *Page, tableList []types.TableItem) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {
@@ -34,25 +34,29 @@ func Table(page *Page, name string, tableList []types.TableItem) templ.Component
 				templ_7745c5c3_Buffer = templ.GetBuffer()
 				defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<form class=\"flex\" hx-post=\"/create_table_data\" hx-target=\"#table-body\" hx-swap=\"innherHTML\"><input type=\"text\" name=\"name\" placeholder=\"Name\"> <input type=\"number\" name=\"age\" placeholder=\"Age\"> <input type=\"text\" name=\"city\" placeholder=\"City\"> <input type=\"text\" name=\"state\" placeholder=\"State\"> <input type=\"submit\" value=\"Add\"></form><form class=\"flex\" hx-put=\"/update_table_data\" hx-target=\"#table-body\" hx-swap=\"innherHTML\"><input type=\"number\" name=\"id\" placeholder=\"ID\"> <input type=\"text\" name=\"name\" placeholder=\"Name\"> <input type=\"number\" name=\"age\" placeholder=\"Age\"> <input type=\"text\" name=\"city\" placeholder=\"City\"> <input type=\"text\" name=\"state\" placeholder=\"State\"> <input type=\"submit\" value=\"Update\"></form><form class=\"flex\" hx-delete=\"/delete_table_data\" hx-target=\"#table-body\" hx-swap=\"innherHTML\"><input type=\"number\" name=\"id\" placeholder=\"ID\"> <input type=\"submit\" value=\"Delete\"></form><table id=\"table\" class=\"table-auto text-center\"><thead><tr class=\"border-b-2 border-solid border-gray-200\"><th class=\"p-2\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Var3 := `Hello, `
+			templ_7745c5c3_Var3 := `ID`
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var3)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var4 string = name
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</th><th class=\"p-2\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div><form hx-post=\"/create_table_data\"><input type=\"text\" name=\"name\" placeholder=\"Name\"> <input type=\"text\" name=\"age\" placeholder=\"Age\"> <input type=\"text\" name=\"city\" placeholder=\"City\"> <input type=\"text\" name=\"state\" placeholder=\"State\"> <input type=\"submit\" value=\"Add\"></form><table class=\"table-auto text-center\"><thead><tr class=\"border-b-2 border-solid border-gray-200\"><th class=\"p-2\">")
+			templ_7745c5c3_Var4 := `Name`
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var4)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Var5 := `Name`
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</th><th class=\"p-2\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Var5 := `Age`
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var5)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -61,7 +65,7 @@ func Table(page *Page, name string, tableList []types.TableItem) templ.Component
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Var6 := `Age`
+			templ_7745c5c3_Var6 := `City`
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var6)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -70,26 +74,26 @@ func Table(page *Page, name string, tableList []types.TableItem) templ.Component
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Var7 := `City`
+			templ_7745c5c3_Var7 := `State`
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var7)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</th><th class=\"p-2\">")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Var8 := `State`
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var8)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</th></tr></thead> <tbody>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</th></tr></thead> <tbody id=\"table-body\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			for _, row := range tableList {
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<tr class=\"border-b-2 border-solid border-gray-200\"><td class=\"p-2\">")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var8 string = fmt.Sprint(row.ID)
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</td><td class=\"p-2\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
