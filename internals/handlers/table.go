@@ -45,14 +45,20 @@ func (a *App) CreateTableData(c echo.Context) error {
 	fmt.Sscanf(ageStr, "%d", &ageInt)
 
 	newItem := types.TableItem{
-		ID:    TableList[len(TableList)-1].ID + 1,
+		ID:    0,
 		Name:  name,
 		Age:   ageInt,
 		City:  city,
 		State: state,
 	}
 
-	TableList = append(TableList, newItem)
+	if len(TableList) == 0 {
+		newItem.ID = 0
+		TableList = []types.TableItem{newItem}
+	} else {
+		newItem.ID = TableList[len(TableList)-1].ID + 1
+		TableList = append(TableList, newItem)
+	}
 
 	return c.HTML(http.StatusOK, getTableHtml())
 }
@@ -103,7 +109,9 @@ func (a *App) UpdateTableData(c echo.Context) error {
 }
 
 func (a *App) DeleteTableData(c echo.Context) error {
-	id := c.FormValue("id")
+	id := c.QueryParam("id")
+
+	fmt.Println("id: ", id)
 
 	idInt := 0
 	fmt.Sscanf(id, "%d", &idInt)
@@ -111,7 +119,7 @@ func (a *App) DeleteTableData(c echo.Context) error {
 	for i, item := range TableList {
 		if item.ID == idInt {
 			TableList = append(TableList[:i], TableList[i+1:]...)
-			return c.JSON(http.StatusOK, map[string]string{"message": "Item deleted successfully"})
+			return c.HTML(http.StatusOK, getTableHtml())
 		}
 	}
 
@@ -129,8 +137,11 @@ func getTableHtml() string {
             <td class="p-2">%d</td>
             <td class="p-2">%s</td>
             <td class="p-2">%s</td>
+			<td class="p-2">
+				<button hx-delete="/delete_table_data?id=%d" hx-target="#table-body">Delete</button>
+			</td>
         </tr>`,
-			row.ID, row.Name, row.Age, row.City, row.State,
+			row.ID, row.Name, row.Age, row.City, row.State, row.ID,
 		)
 	}
 

@@ -22,11 +22,7 @@ templ Table(page *Page, tableList []types.TableItem) {
 			<input type="text" name="state" placeholder="State" />
 			<input type="submit" value="Update" />
 		</form>
-		<form class="flex" hx-delete="/delete_table_data" hx-target="#table-body" hx-swap="innherHTML">
-			<input type="number" name="id" placeholder="ID" />
-			<input type="submit" value="Delete" />
-		</form>
-		<table id="table" class="table-auto text-center">
+		<table id="table" class="table-auto text-center" hx-target="closest tr" hx-swap="outerHTML">
 			<thead>
 				<tr class="border-b-2 border-solid border-gray-200">
 					<th class="p-2">ID</th>
@@ -44,6 +40,17 @@ templ Table(page *Page, tableList []types.TableItem) {
 					<td class="p-2">{ fmt.Sprint(row.Age) }</td>
 					<td class="p-2">{ row.City }</td>
 					<td class="p-2">{ row.State }</td>
+					<td class="p-2">
+						<button hx-delete={"/delete_table_data?id=" + fmt.Sprint(row.ID)} hx-target="#table-body">Delete</button>
+						// <button 
+						// 	hx-get="/modal" 
+						// 	hx-target="#modals-here" 
+						// 	hx-trigger="click" 
+						// 	data-bs-toggle="modal" 
+						// 	data-bs-target="#modals-here"
+						// 	class="btn btn-primary">Open Modal</button>
+						// <button hx-get={"/update_table_data?id=" + fmt.Sprint(row.ID)} hx-target="#table-body">Edit</button>
+					</td>
 				</tr>
 			}
 			</tbody>

@@ -34,7 +34,7 @@ func Table(page *Page, tableList []types.TableItem) templ.Component {
 				templ_7745c5c3_Buffer = templ.GetBuffer()
 				defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<form class=\"flex\" hx-post=\"/create_table_data\" hx-target=\"#table-body\" hx-swap=\"innherHTML\"><input type=\"text\" name=\"name\" placeholder=\"Name\"> <input type=\"number\" name=\"age\" placeholder=\"Age\"> <input type=\"text\" name=\"city\" placeholder=\"City\"> <input type=\"text\" name=\"state\" placeholder=\"State\"> <input type=\"submit\" value=\"Add\"></form><form class=\"flex\" hx-put=\"/update_table_data\" hx-target=\"#table-body\" hx-swap=\"innherHTML\"><input type=\"number\" name=\"id\" placeholder=\"ID\"> <input type=\"text\" name=\"name\" placeholder=\"Name\"> <input type=\"number\" name=\"age\" placeholder=\"Age\"> <input type=\"text\" name=\"city\" placeholder=\"City\"> <input type=\"text\" name=\"state\" placeholder=\"State\"> <input type=\"submit\" value=\"Update\"></form><form class=\"flex\" hx-delete=\"/delete_table_data\" hx-target=\"#table-body\" hx-swap=\"innherHTML\"><input type=\"number\" name=\"id\" placeholder=\"ID\"> <input type=\"submit\" value=\"Delete\"></form><table id=\"table\" class=\"table-auto text-center\"><thead><tr class=\"border-b-2 border-solid border-gray-200\"><th class=\"p-2\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<form class=\"flex\" hx-post=\"/create_table_data\" hx-target=\"#table-body\" hx-swap=\"innherHTML\"><input type=\"text\" name=\"name\" placeholder=\"Name\"> <input type=\"number\" name=\"age\" placeholder=\"Age\"> <input type=\"text\" name=\"city\" placeholder=\"City\"> <input type=\"text\" name=\"state\" placeholder=\"State\"> <input type=\"submit\" value=\"Add\"></form><form class=\"flex\" hx-put=\"/update_table_data\" hx-target=\"#table-body\" hx-swap=\"innherHTML\"><input type=\"number\" name=\"id\" placeholder=\"ID\"> <input type=\"text\" name=\"name\" placeholder=\"Name\"> <input type=\"number\" name=\"age\" placeholder=\"Age\"> <input type=\"text\" name=\"city\" placeholder=\"City\"> <input type=\"text\" name=\"state\" placeholder=\"State\"> <input type=\"submit\" value=\"Update\"></form><table id=\"table\" class=\"table-auto text-center\" hx-target=\"closest tr\" hx-swap=\"outerHTML\"><thead><tr class=\"border-b-2 border-solid border-gray-200\"><th class=\"p-2\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -129,7 +129,24 @@ func Table(page *Page, tableList []types.TableItem) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</td></tr>")
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</td><td class=\"p-2\"><button hx-delete=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString("/delete_table_data?id=" + fmt.Sprint(row.ID)))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-target=\"#table-body\">")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Var13 := `Delete`
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var13)
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</button></td></tr>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
