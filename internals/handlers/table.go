@@ -147,3 +147,41 @@ func getTableHtml() string {
 
 	return html
 }
+
+func (a *App) ShowModal(c echo.Context) error {
+	id := c.QueryParam("id")
+	modal_type := c.QueryParam("modal_type")
+
+	action := "/create_table_data"
+	method := "POST"
+	buttonText := "Create"
+
+	if modal_type == "update" {
+		action = "/update_table_data"
+		buttonText = "Update"
+		method = "PUT"
+	}
+
+	item := types.TableItem{}
+
+	idInt := 0
+	fmt.Sscanf(id, "%d", &idInt)
+
+	for _, row := range TableList {
+		if row.ID == idInt {
+			item = row
+			break
+		}
+	}
+
+	modalData := types.ModalData{
+		Action:     action,
+		Data:       item,
+		ButtonText: buttonText,
+		Method:     method,
+	}
+
+	components := templates.Modal(modalData)
+
+	return components.Render(context.Background(), c.Response().Writer)
+}

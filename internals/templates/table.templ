@@ -42,18 +42,12 @@ templ Table(page *Page, tableList []types.TableItem) {
 					<td class="p-2">{ row.State }</td>
 					<td class="p-2">
 						<button hx-delete={"/delete_table_data?id=" + fmt.Sprint(row.ID)} hx-target="#table-body">Delete</button>
-						// <button 
-						// 	hx-get="/modal" 
-						// 	hx-target="#modals-here" 
-						// 	hx-trigger="click" 
-						// 	data-bs-toggle="modal" 
-						// 	data-bs-target="#modals-here"
-						// 	class="btn btn-primary">Open Modal</button>
-						// <button hx-get={"/update_table_data?id=" + fmt.Sprint(row.ID)} hx-target="#table-body">Edit</button>
+						<button hx-get={"/show_modal?modal_type=update&id=" + fmt.Sprint(row.ID)} hx-target="#modal">Update</button>
 					</td>
 				</tr>
 			}
 			</tbody>
 		</table>
+		<div id="modal"></div>
 	}
 }
