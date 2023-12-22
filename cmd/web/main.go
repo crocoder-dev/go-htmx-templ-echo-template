@@ -36,6 +36,7 @@ func main() {
 	e.PUT("/update_table_data", app.UpdateTableData)
 	e.DELETE("/delete_table_data", app.DeleteTableData)
 	e.GET("/show_modal", app.ShowModal)
+	e.POST("/close_modal", app.CloseModal)
 
 	e.Static("/", "dist")
 

@@ -60,7 +60,8 @@ func (a *App) CreateTableData(c echo.Context) error {
 		TableList = append(TableList, newItem)
 	}
 
-	return c.HTML(http.StatusOK, getTableHtml())
+	components := templates.TableRow(newItem)
+	return components.Render(context.Background(), c.Response().Writer)
 }
 
 func (a *App) ReadTableData(c echo.Context) error {
@@ -69,7 +70,7 @@ func (a *App) ReadTableData(c echo.Context) error {
 
 func (a *App) UpdateTableData(c echo.Context) error {
 	// Retrieve form values
-	id := c.FormValue("id")
+	id := c.QueryParam("id")
 	formName := c.FormValue("name")
 	formAgeStr := c.FormValue("age")
 	formCity := c.FormValue("city")
@@ -100,7 +101,8 @@ func (a *App) UpdateTableData(c echo.Context) error {
 			}
 
 			TableList[i] = item
-			return c.HTML(http.StatusOK, getTableHtml())
+			components := templates.TableRow(item)
+			return components.Render(context.Background(), c.Response().Writer)
 		}
 	}
 
@@ -119,33 +121,11 @@ func (a *App) DeleteTableData(c echo.Context) error {
 	for i, item := range TableList {
 		if item.ID == idInt {
 			TableList = append(TableList[:i], TableList[i+1:]...)
-			return c.HTML(http.StatusOK, getTableHtml())
+			return c.JSON(http.StatusOK, map[string]string{"message": "Item deleted"})
 		}
 	}
 
 	return c.JSON(http.StatusNotFound, map[string]string{"error": "Item not found"})
-}
-
-func getTableHtml() string {
-	html := ""
-
-	for _, row := range TableList {
-		html += fmt.Sprintf(`
-        <tr class="border-b-2 border-solid border-gray-200">
-            <td class="p-2">%d</td> 
-            <td class="p-2">%s</td> 
-            <td class="p-2">%d</td>
-            <td class="p-2">%s</td>
-            <td class="p-2">%s</td>
-			<td class="p-2">
-				<button hx-delete="/delete_table_data?id=%d" hx-target="#table-body">Delete</button>
-			</td>
-        </tr>`,
-			row.ID, row.Name, row.Age, row.City, row.State, row.ID,
-		)
-	}
-
-	return html
 }
 
 func (a *App) ShowModal(c echo.Context) error {
@@ -162,15 +142,22 @@ func (a *App) ShowModal(c echo.Context) error {
 		method = "PUT"
 	}
 
-	item := types.TableItem{}
-
+	item := types.TableItem{
+		ID:    0,
+		Name:  "",
+		Age:   0,
+		City:  "",
+		State: "",
+	}
 	idInt := 0
-	fmt.Sscanf(id, "%d", &idInt)
+	if id != "" {
+		fmt.Sscanf(id, "%d", &idInt)
 
-	for _, row := range TableList {
-		if row.ID == idInt {
-			item = row
-			break
+		for _, row := range TableList {
+			if row.ID == idInt {
+				item = row
+				break
+			}
 		}
 	}
 
@@ -184,4 +171,8 @@ func (a *App) ShowModal(c echo.Context) error {
 	components := templates.Modal(modalData)
 
 	return components.Render(context.Background(), c.Response().Writer)
+}
+
+func (a *App) CloseModal(c echo.Context) error {
+	return nil
 }
