@@ -42,13 +42,13 @@ templ FormData(data types.ModalData) {
 }
 
 templ TableRow(row types.TableItem) {
-    <tr id={"row-" + fmt.Sprint(row.ID)}>
+    <tr id={"row-" + fmt.Sprint(row.ID)} class="text-center">
         <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-0">{ fmt.Sprint(row.ID) }</td>
         <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{ row.Name }</td>
         <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{ fmt.Sprint(row.Age) }</td>
         <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{ row.City }</td>
         <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{ row.State }</td>
-        <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-0">
+        <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-sm font-medium sm:pr-0">
             <button hx-get={"/show_modal?modal_type=update&id=" + fmt.Sprint(row.ID)} hx-swap="innerHTML" hx-target="#modal-holder" class="text-indigo-600 mr-2 hover:text-indigo-900">Update</button>
             <button hx-delete={"/delete_table_data?id=" + fmt.Sprint(row.ID)} hx-target={"#row-" + fmt.Sprint(row.ID)} hx-swap="delete" class="text-red-600 hover:text-red-900">Delete</button>
         </td>

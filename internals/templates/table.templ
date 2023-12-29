@@ -21,12 +21,13 @@ templ Table(page *Page, tableList []types.TableItem) {
 					<div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
 						<table class="min-w-full divide-y divide-gray-300">
 						<thead>
-							<tr>
-							<th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-0">ID</th>
-							<th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Name</th>
-							<th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">City</th>
-							<th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">State</th>
-							<th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Actions</th>
+							<tr class="text-center">
+								<th scope="col" class="py-3.5 pl-4 pr-3 text-sm font-semibold text-gray-900 sm:pl-0">ID</th>
+								<th scope="col" class="px-3 py-3.5 text-sm font-semibold text-gray-900">Name</th>
+								<th scope="col" class="px-3 py-3.5 text-sm font-semibold text-gray-900">Age</th>
+								<th scope="col" class="px-3 py-3.5 text-sm font-semibold text-gray-900">City</th>
+								<th scope="col" class="px-3 py-3.5 text-sm font-semibold text-gray-900">State</th>
+								<th scope="col" class="px-3 py-3.5 text-sm font-semibold text-gray-900">Actions</th>
 							</tr>
 						</thead>
 						<tbody class="divide-y divide-gray-200" id="table-body">
