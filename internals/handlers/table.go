@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"go-htmx-templ-echo-template/internals/templates"
 	"go-htmx-templ-echo-template/internals/types"
+	"strconv"
 
 	"net/http"
 
@@ -41,8 +42,10 @@ func (a *App) CreateTableData(c echo.Context) error {
 	city := c.FormValue("city")
 	state := c.FormValue("state")
 
-	ageInt := 0
-	fmt.Sscanf(ageStr, "%d", &ageInt)
+	ageInt, err := strconv.Atoi(ageStr)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, "Invalid age")
+	}
 
 	newItem := types.TableItem{
 		ID:    0,
@@ -76,11 +79,15 @@ func (a *App) UpdateTableData(c echo.Context) error {
 	formCity := c.FormValue("city")
 	formState := c.FormValue("state")
 	// Convert age to int
-	ageInt := 0
-	fmt.Sscanf(formAgeStr, "%d", &ageInt)
+	ageInt, err := strconv.Atoi(formAgeStr)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, "Invalid age")
+	}
 	// Convert ID to int
-	idInt := 0
-	fmt.Sscanf(id, "%d", &idInt)
+	idInt, err := strconv.Atoi(id)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, "Invalid ID")
+	}
 
 	for i, item := range TableList {
 		if item.ID == idInt {
@@ -110,13 +117,45 @@ func (a *App) UpdateTableData(c echo.Context) error {
 	return c.JSON(http.StatusNotFound, map[string]string{"error": "Item not found"})
 }
 
+func (a *App) OpenUpdateRow(c echo.Context) error {
+	id := c.QueryParam("id")
+	idInt, err := strconv.Atoi(id)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, "Invalid ID")
+	}
+	for _, item := range TableList {
+		if item.ID == idInt {
+			components := templates.TableInputRow(item)
+			return components.Render(context.Background(), c.Response().Writer)
+		}
+	}
+	return c.JSON(http.StatusNotFound, map[string]string{"error": "Item not found"})
+}
+
+func (a *App) CancelUpdate(c echo.Context) error {
+	id := c.QueryParam("id")
+	idInt, err := strconv.Atoi(id)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, "Invalid ID")
+	}
+	for _, item := range TableList {
+		if item.ID == idInt {
+			components := templates.TableRow(item)
+			return components.Render(context.Background(), c.Response().Writer)
+		}
+	}
+	return c.JSON(http.StatusNotFound, map[string]string{"error": "Item update cancel failed"})
+}
+
 func (a *App) DeleteTableData(c echo.Context) error {
 	id := c.QueryParam("id")
 
 	fmt.Println("id: ", id)
 
-	idInt := 0
-	fmt.Sscanf(id, "%d", &idInt)
+	idInt, err := strconv.Atoi(id)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, "Invalid ID")
+	}
 
 	for i, item := range TableList {
 		if item.ID == idInt {
@@ -129,47 +168,7 @@ func (a *App) DeleteTableData(c echo.Context) error {
 }
 
 func (a *App) ShowModal(c echo.Context) error {
-	id := c.QueryParam("id")
-	modal_type := c.QueryParam("modal_type")
-
-	action := "/create_table_data"
-	method := "POST"
-	buttonText := "Create"
-
-	if modal_type == "update" {
-		action = "/update_table_data"
-		buttonText = "Update"
-		method = "PUT"
-	}
-
-	item := types.TableItem{
-		ID:    0,
-		Name:  "",
-		Age:   0,
-		City:  "",
-		State: "",
-	}
-	idInt := 0
-	if id != "" {
-		fmt.Sscanf(id, "%d", &idInt)
-
-		for _, row := range TableList {
-			if row.ID == idInt {
-				item = row
-				break
-			}
-		}
-	}
-
-	modalData := types.ModalData{
-		Action:     action,
-		Data:       item,
-		ButtonText: buttonText,
-		Method:     method,
-	}
-
-	components := templates.Modal(modalData)
-
+	components := templates.Modal()
 	return components.Render(context.Background(), c.Response().Writer)
 }
 

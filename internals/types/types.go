@@ -7,10 +7,3 @@ type TableItem struct {
 	City  string `json:"city"`
 	State string `json:"state"`
 }
-
-type ModalData struct {
-	Action     string
-	Data       TableItem
-	ButtonText string
-	Method     string
-}
