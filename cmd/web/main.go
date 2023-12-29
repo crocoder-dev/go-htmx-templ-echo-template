@@ -29,8 +29,8 @@ func main() {
 
 	e.GET("/", app.Home)
 	e.GET("/about", app.About)
-	e.GET("/table", app.Table)
 
+	e.GET("/table", app.Table)
 	e.POST("/table", app.CreateTableData)
 	e.PUT("/table", app.UpdateTableData)
 	e.DELETE("/table", app.DeleteTableData)

@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"context"
-	"fmt"
 	"go-htmx-templ-echo-template/internals/templates"
 	"strconv"
 
@@ -19,6 +18,7 @@ func (a *App) Table(c echo.Context) error {
 	r := c.Request()
 	h := r.Context().Value(htmx.ContextRequestHeader).(htmx.HxRequestHeader)
 	tableData = make(map[int]templates.Item)
+	id = 0
 	tableData[id] = templates.Item{
 		ID:    id,
 		Name:  "Dean",
@@ -45,7 +45,7 @@ func (a *App) CreateTableData(c echo.Context) error {
 
 	ageInt, err := strconv.Atoi(ageStr)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, "Invalid age")
+		return c.HTML(http.StatusBadRequest, "<p>Invalid age</p>")
 	}
 
 	newItem := templates.Item{
@@ -65,7 +65,7 @@ func (a *App) CreateTableData(c echo.Context) error {
 
 func (a *App) UpdateTableData(c echo.Context) error {
 	// Retrieve form values
-	id := c.QueryParam("id")
+	id := c.FormValue("id")
 	formName := c.FormValue("name")
 	formAgeStr := c.FormValue("age")
 	formCity := c.FormValue("city")
@@ -110,7 +110,7 @@ func (a *App) UpdateTableData(c echo.Context) error {
 }
 
 func (a *App) OpenUpdateRow(c echo.Context) error {
-	id := c.QueryParam("id")
+	id := c.FormValue("id")
 	idInt, err := strconv.Atoi(id)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, "Invalid ID")
@@ -125,7 +125,7 @@ func (a *App) OpenUpdateRow(c echo.Context) error {
 }
 
 func (a *App) CancelUpdate(c echo.Context) error {
-	id := c.QueryParam("id")
+	id := c.FormValue("id")
 	idInt, err := strconv.Atoi(id)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, "Invalid ID")
@@ -140,9 +140,7 @@ func (a *App) CancelUpdate(c echo.Context) error {
 }
 
 func (a *App) DeleteTableData(c echo.Context) error {
-	id := c.QueryParam("id")
-
-	fmt.Println("id: ", id)
+	id := c.FormValue("id")
 
 	idInt, err := strconv.Atoi(id)
 	if err != nil {

@@ -12,6 +12,13 @@ type Item struct {
 	State string `json:"state"`
 }
 
+script handleErrors() {
+	document.body.addEventListener("htmx:beforeSwap", function(event) {
+		console.log(event.detail.failed, event.detail.xhr.status, event.detail.xhr.statusText);
+	});
+}
+
+
 templ Modal() {
 	<div id="modal" hx-boost="true" class="relative z-10" aria-labelledby="modal-title" role="dialog" aria-modal="true">
 		<div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
@@ -103,5 +110,6 @@ templ Table(page *Page, tableData map[int]Item) {
 			</div>
 		</div>
 		<div id="modal-holder"></div>
+		@handleErrors()
 	}
 }
