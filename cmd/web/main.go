@@ -31,16 +31,15 @@ func main() {
 	e.GET("/about", app.About)
 	e.GET("/table", app.Table)
 
-	e.POST("/create_table_data", app.CreateTableData)
-	e.GET("/read_table_data", app.ReadTableData)
-	e.PUT("/update_table_data", app.UpdateTableData)
-	e.DELETE("/delete_table_data", app.DeleteTableData)
+	e.POST("/table", app.CreateTableData)
+	e.PUT("/table", app.UpdateTableData)
+	e.DELETE("/table", app.DeleteTableData)
 
-	e.GET("/show_modal", app.ShowModal)
-	e.POST("/close_modal", app.CloseModal)
+	e.GET("/table/new", app.ShowModal)
+	e.POST("/table/new", app.CloseModal)
 
-	e.GET("/open_update_row", app.OpenUpdateRow)
-	e.GET("/cancel_update", app.CancelUpdate)
+	e.GET("/table/update", app.OpenUpdateRow)
+	e.POST("/table/update", app.CancelUpdate)
 
 	e.Static("/", "dist")
 

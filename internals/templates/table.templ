@@ -1,10 +1,72 @@
 package templates
 
 import (
-	"go-htmx-templ-echo-template/internals/types"
+	"strconv"
 )
 
-templ Table(page *Page, tableList []types.TableItem) {
+type Item struct {
+	ID    int    `json:"id"`
+	Name  string `json:"name"`
+	Age   int    `json:"age"`
+	City  string `json:"city"`
+	State string `json:"state"`
+}
+
+templ Modal() {
+	<div id="modal" hx-boost="true" class="relative z-10" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+		<div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+		<div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+			<div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+				<div class="relative transform overflow-hidden rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6">
+					<form hx-post="/table" hx-target="#table-body" hx-swap="beforeend" class="flex flex-col">
+						<label for="name" class="block text-sm font-medium leading-6 text-gray-900">Name</label>
+						<input type="text" name="name" id="name" class="mb-2 pl-2 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" placeholder="Your name"/>
+						<label for="age" class="block text-sm font-medium leading-6 text-gray-900">Age</label>
+						<input type="number" name="age" id="age" class="mb-2 pl-2 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" placeholder="Your age"/>
+						<label for="city" class="block text-sm font-medium leading-6 text-gray-900">City</label>
+						<input type="text" name="city" id="city" class="mb-2 pl-2 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" placeholder="Your city"/>
+						<label for="state" class="block text-sm font-medium leading-6 text-gray-900">State</label>
+						<input type="text" name="state" id="state" class="mb-2 pl-2 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" placeholder="Your state"/>
+						<div class="mt-5 sm:mt-6 sm:grid sm:grid-flow-row-dense sm:grid-cols-2 sm:gap-3">
+							<input type="submit" value="Add user" class="inline-flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 sm:col-start-2"/>
+							<button hx-post="/table/new" hx-target="#modal" hx-swap="delete" class="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:col-start-1 sm:mt-0">Cancel</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+}
+
+templ TableRow(row Item) {
+	<tr id={ "row-" + strconv.Itoa(row.ID) } class="text-center">
+		<td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-0">{ strconv.Itoa(row.ID) }</td>
+		<td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{ row.Name }</td>
+		<td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{ strconv.Itoa(row.Age) }</td>
+		<td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{ row.City }</td>
+		<td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{ row.State }</td>
+		<td class="whitespace-nowrap py-4 pl-3 pr-4 text-sm font-medium sm:pr-0">
+			<button hx-get={ "/table/update?id=" + strconv.Itoa(row.ID) } hx-swap="outerHTML" hx-target="closest tr" class="text-indigo-600 mr-2 hover:text-indigo-900">Update</button>
+			<button hx-delete={ "/table?id=" + strconv.Itoa(row.ID) } hx-target={ "#row-" + strconv.Itoa(row.ID) } hx-swap="delete" class="text-red-600 hover:text-red-900">Delete</button>
+		</td>
+	</tr>
+}
+
+templ TableInputRow(row Item) {
+	<tr id={ "row-" + strconv.Itoa(row.ID) } class="text-center">
+		<td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-0">{ strconv.Itoa(row.ID) }</td>
+		<td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500"><input type="text" name="name" id="name" class="mb-2 pl-2 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" placeholder="Name" value={ row.Name }/></td>
+		<td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500"><input type="number" name="age" id="age" class="mb-2 pl-2 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" placeholder="Age" value={ strconv.Itoa(row.Age) }/></td>
+		<td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500"><input type="text" name="city" id="city" class="mb-2 pl-2 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" placeholder="City" value={ row.City }/></td>
+		<td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500"><input type="text" name="state" id="state" class="mb-2 pl-2 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" placeholder="State" value={ row.State }/></td>
+		<td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-sm font-medium sm:pr-0">
+			<button hx-post={ "/table/update?id=" + strconv.Itoa(row.ID) } hx-target="closest tr" hx-swap="outerHTML" class="text-gray-600 mr-2 hover:text-gray-900">Cancel</button>
+			<button hx-put={ "/table?id=" + strconv.Itoa(row.ID) } hx-target="closest tr" hx-include="closest tr" hx-swap="outerHTML" class="text-green-600 hover:text-green-900">Save</button>
+		</td>
+	</tr>
+}
+
+templ Table(page *Page, tableData map[int]Item) {
 	@Layout(page) {
 		<div class="px-4 py-4 mx-auto max-w-[1000px] sm:px-6 lg:px-8">
 			<div class="sm:flex sm:items-center">
@@ -13,28 +75,28 @@ templ Table(page *Page, tableList []types.TableItem) {
 					<p class="mt-2 text-sm text-gray-700">A list of all the users in your account including their name, title, email and role.</p>
 				</div>
 				<div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
-					<button hx-get="/show_modal?modal_type=add" hx-target="#modal-holder" class="block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Add user</button>
+					<button hx-get="/table/new" hx-target="#modal-holder" class="block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Add user</button>
 				</div>
 			</div>
 			<div class="mt-8 flow-root">
 				<div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
 					<div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
 						<table class="min-w-full divide-y divide-gray-300">
-						<thead>
-							<tr class="text-center">
-								<th scope="col" class="py-3.5 pl-4 pr-3 text-sm font-semibold text-gray-900 sm:pl-0">ID</th>
-								<th scope="col" class="px-3 py-3.5 text-sm font-semibold text-gray-900">Name</th>
-								<th scope="col" class="px-3 py-3.5 text-sm font-semibold text-gray-900">Age</th>
-								<th scope="col" class="px-3 py-3.5 text-sm font-semibold text-gray-900">City</th>
-								<th scope="col" class="px-3 py-3.5 text-sm font-semibold text-gray-900">State</th>
-								<th scope="col" class="px-3 py-3.5 text-sm font-semibold text-gray-900">Actions</th>
-							</tr>
-						</thead>
-						<tbody class="divide-y divide-gray-200" id="table-body">
-						for _, row := range tableList {
-							@TableRow(row)
-						}
-						</tbody>
+							<thead>
+								<tr class="text-center">
+									<th scope="col" class="py-3.5 pl-4 pr-3 text-sm font-semibold text-gray-900 sm:pl-0">ID</th>
+									<th scope="col" class="px-3 py-3.5 text-sm font-semibold text-gray-900">Name</th>
+									<th scope="col" class="px-3 py-3.5 text-sm font-semibold text-gray-900">Age</th>
+									<th scope="col" class="px-3 py-3.5 text-sm font-semibold text-gray-900">City</th>
+									<th scope="col" class="px-3 py-3.5 text-sm font-semibold text-gray-900">State</th>
+									<th scope="col" class="px-3 py-3.5 text-sm font-semibold text-gray-900">Actions</th>
+								</tr>
+							</thead>
+							<tbody class="divide-y divide-gray-200" id="table-body">
+								for _, row := range tableData {
+									@TableRow(row)
+								}
+							</tbody>
 						</table>
 					</div>
 				</div>

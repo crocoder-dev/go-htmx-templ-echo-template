@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"go-htmx-templ-echo-template/internals/templates"
-	"go-htmx-templ-echo-template/internals/types"
 	"strconv"
 
 	"net/http"
@@ -13,26 +12,28 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-var TableList []types.TableItem
+var tableData map[int]templates.Item
+var id int
 
 func (a *App) Table(c echo.Context) error {
 	r := c.Request()
 	h := r.Context().Value(htmx.ContextRequestHeader).(htmx.HxRequestHeader)
-	TableList = TableList[:0]
-	TableList = append(TableList, types.TableItem{
-		ID:    1,
-		Name:  "Dude",
-		Age:   25,
+	tableData = make(map[int]templates.Item)
+	tableData[id] = templates.Item{
+		ID:    id,
+		Name:  "Dean",
+		Age:   28,
 		City:  "New York",
 		State: "NY",
-	})
+	}
+	id++
 
 	page := &templates.Page{
 		Title:   "Home",
 		Boosted: h.HxBoosted,
 	}
 
-	components := templates.Table(page, TableList)
+	components := templates.Table(page, tableData)
 	return components.Render(context.Background(), c.Response().Writer)
 }
 
@@ -47,28 +48,19 @@ func (a *App) CreateTableData(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, "Invalid age")
 	}
 
-	newItem := types.TableItem{
-		ID:    0,
+	newItem := templates.Item{
+		ID:    id,
 		Name:  name,
 		Age:   ageInt,
 		City:  city,
 		State: state,
 	}
+	id++
 
-	if len(TableList) == 0 {
-		newItem.ID = 0
-		TableList = []types.TableItem{newItem}
-	} else {
-		newItem.ID = TableList[len(TableList)-1].ID + 1
-		TableList = append(TableList, newItem)
-	}
+	tableData[newItem.ID] = newItem
 
 	components := templates.TableRow(newItem)
 	return components.Render(context.Background(), c.Response().Writer)
-}
-
-func (a *App) ReadTableData(c echo.Context) error {
-	return c.JSON(http.StatusOK, TableList)
 }
 
 func (a *App) UpdateTableData(c echo.Context) error {
@@ -89,7 +81,7 @@ func (a *App) UpdateTableData(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, "Invalid ID")
 	}
 
-	for i, item := range TableList {
+	for i, item := range tableData {
 		if item.ID == idInt {
 			if formName != "" && formName != item.Name {
 				item.Name = formName
@@ -107,7 +99,7 @@ func (a *App) UpdateTableData(c echo.Context) error {
 				item.State = formState
 			}
 
-			TableList[i] = item
+			tableData[i] = item
 			components := templates.TableRow(item)
 			return components.Render(context.Background(), c.Response().Writer)
 		}
@@ -123,7 +115,7 @@ func (a *App) OpenUpdateRow(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, "Invalid ID")
 	}
-	for _, item := range TableList {
+	for _, item := range tableData {
 		if item.ID == idInt {
 			components := templates.TableInputRow(item)
 			return components.Render(context.Background(), c.Response().Writer)
@@ -138,7 +130,7 @@ func (a *App) CancelUpdate(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, "Invalid ID")
 	}
-	for _, item := range TableList {
+	for _, item := range tableData {
 		if item.ID == idInt {
 			components := templates.TableRow(item)
 			return components.Render(context.Background(), c.Response().Writer)
@@ -157,9 +149,9 @@ func (a *App) DeleteTableData(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, "Invalid ID")
 	}
 
-	for i, item := range TableList {
+	for _, item := range tableData {
 		if item.ID == idInt {
-			TableList = append(TableList[:i], TableList[i+1:]...)
+			delete(tableData, idInt)
 			return c.JSON(http.StatusOK, map[string]string{"message": "Item deleted"})
 		}
 	}
