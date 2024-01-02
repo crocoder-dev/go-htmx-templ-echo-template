@@ -3,20 +3,13 @@ package main
 import (
 	"context"
 	"go-htmx-templ-echo-template/internals/handlers"
-	"log"
-	"os"
 
 	"github.com/donseba/go-htmx"
-	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 	echoMiddleware "github.com/labstack/echo/v4/middleware"
 )
 
 func main() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
 
 	app := &handlers.App{
 		HTMX: htmx.New(),
@@ -43,7 +36,7 @@ func main() {
 
 	e.Static("/", "dist")
 
-	e.Logger.Fatal(e.Start(":" + os.Getenv("PORT")))
+	e.Logger.Fatal(e.Start(":3000"))
 }
 
 func HtmxMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
