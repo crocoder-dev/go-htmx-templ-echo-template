@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"fmt"
 	"go-htmx-templ-echo-template/internals/templates"
 	"strconv"
 
@@ -17,6 +18,15 @@ var id int
 func (a *App) Table(c echo.Context) error {
 	r := c.Request()
 	h := r.Context().Value(htmx.ContextRequestHeader).(htmx.HxRequestHeader)
+
+	fmt.Println("hx-boosted:", h.HxBoosted)
+	fmt.Println("hx-current-url:", h.HxCurrentURL)
+	fmt.Println("hx-history-restore-request:", h.HxHistoryRestoreRequest)
+	fmt.Println("hx-prompt:", h.HxPrompt)
+	fmt.Println("hx-target:", h.HxTarget)
+	fmt.Println("hx-trigger:", h.HxTrigger)
+	fmt.Println("hx-trigger-name:", h.HxTriggerName)
+
 	tableData = make(map[int]templates.Item)
 	id = 0
 	tableData[id] = templates.Item{

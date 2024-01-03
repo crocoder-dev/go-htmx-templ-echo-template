@@ -27,6 +27,7 @@ func main() {
 	e.POST("/table", app.CreateTableData)
 	e.PUT("/table", app.UpdateTableData)
 	e.DELETE("/table", app.DeleteTableData)
+	e.PATCH("/table", app.Table)
 
 	e.GET("/table/new", app.ShowModal)
 	e.POST("/table/new", app.CloseModal)
