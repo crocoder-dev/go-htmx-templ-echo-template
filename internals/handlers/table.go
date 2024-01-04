@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"context"
-	"fmt"
 	"go-htmx-templ-echo-template/internals/templates"
 	"strconv"
 
@@ -19,14 +18,6 @@ func (a *App) Table(c echo.Context) error {
 	r := c.Request()
 	h := r.Context().Value(htmx.ContextRequestHeader).(htmx.HxRequestHeader)
 
-	fmt.Println("hx-boosted:", h.HxBoosted)
-	fmt.Println("hx-current-url:", h.HxCurrentURL)
-	fmt.Println("hx-history-restore-request:", h.HxHistoryRestoreRequest)
-	fmt.Println("hx-prompt:", h.HxPrompt)
-	fmt.Println("hx-target:", h.HxTarget)
-	fmt.Println("hx-trigger:", h.HxTrigger)
-	fmt.Println("hx-trigger-name:", h.HxTriggerName)
-
 	tableData = make(map[int]templates.Item)
 	id = 0
 	tableData[id] = templates.Item{
@@ -39,7 +30,7 @@ func (a *App) Table(c echo.Context) error {
 	id++
 
 	page := &templates.Page{
-		Title:   "Home",
+		Title:   "Table",
 		Boosted: h.HxBoosted,
 	}
 
@@ -75,7 +66,7 @@ func (a *App) CreateTableData(c echo.Context) error {
 
 func (a *App) UpdateTableData(c echo.Context) error {
 	// Retrieve form values
-	id := c.FormValue("id")
+	id := c.QueryParam("id")
 	formName := c.FormValue("name")
 	formAgeStr := c.FormValue("age")
 	formCity := c.FormValue("city")
@@ -110,6 +101,7 @@ func (a *App) UpdateTableData(c echo.Context) error {
 			}
 
 			tableData[i] = item
+			c.Response().Header().Set("HX-Push-Url", "/table")
 			components := templates.TableRow(item)
 			return components.Render(context.Background(), c.Response().Writer)
 		}
@@ -120,7 +112,7 @@ func (a *App) UpdateTableData(c echo.Context) error {
 }
 
 func (a *App) OpenUpdateRow(c echo.Context) error {
-	id := c.FormValue("id")
+	id := c.Param("slug")
 	idInt, err := strconv.Atoi(id)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, "Invalid ID")
@@ -135,13 +127,14 @@ func (a *App) OpenUpdateRow(c echo.Context) error {
 }
 
 func (a *App) CancelUpdate(c echo.Context) error {
-	id := c.FormValue("id")
+	id := c.Param("slug")
 	idInt, err := strconv.Atoi(id)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, "Invalid ID")
 	}
 	for _, item := range tableData {
 		if item.ID == idInt {
+			c.Response().Header().Set("HX-Push-Url", "/table")
 			components := templates.TableRow(item)
 			return components.Render(context.Background(), c.Response().Writer)
 		}
@@ -170,8 +163,4 @@ func (a *App) DeleteTableData(c echo.Context) error {
 func (a *App) ShowModal(c echo.Context) error {
 	components := templates.Modal()
 	return components.Render(context.Background(), c.Response().Writer)
-}
-
-func (a *App) CloseModal(c echo.Context) error {
-	return nil
 }

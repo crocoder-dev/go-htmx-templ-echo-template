@@ -30,10 +30,9 @@ func main() {
 	e.PATCH("/table", app.Table)
 
 	e.GET("/table/new", app.ShowModal)
-	e.POST("/table/new", app.CloseModal)
 
-	e.GET("/table/update", app.OpenUpdateRow)
-	e.POST("/table/update", app.CancelUpdate)
+	e.GET("/table/update/:slug", app.OpenUpdateRow)
+	e.POST("/table/update/:slug", app.CancelUpdate)
 
 	e.Static("/", "dist")
 
