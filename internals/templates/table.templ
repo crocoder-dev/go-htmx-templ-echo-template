@@ -15,6 +15,21 @@ type Item struct {
 script handleErrors() {
 	document.body.addEventListener("htmx:beforeSwap", function(event) {
 		console.log(event.detail.failed, event.detail.xhr.status, event.detail.xhr.statusText);
+		
+		try {
+			const jsonData = JSON.parse(event.detail.serverResponse);
+			if (jsonData.error) {
+				setTimeout(() => {
+					alert(jsonData.error);
+				}, 0)
+			} else if (jsonData.message) {
+				setTimeout(() => {
+					alert(jsonData.message);
+				}, 0)
+			}
+		} catch(e) {
+
+		}
 	});
 }
 

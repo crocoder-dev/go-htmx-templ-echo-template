@@ -46,7 +46,7 @@ func (a *App) CreateTableData(c echo.Context) error {
 
 	ageInt, err := strconv.Atoi(ageStr)
 	if err != nil {
-		return c.HTML(http.StatusBadRequest, "<p>Invalid age</p>")
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid Age"})
 	}
 
 	newItem := templates.Item{
@@ -74,12 +74,12 @@ func (a *App) UpdateTableData(c echo.Context) error {
 	// Convert age to int
 	ageInt, err := strconv.Atoi(formAgeStr)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, "Invalid age")
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid Age"})
 	}
 	// Convert ID to int
 	idInt, err := strconv.Atoi(id)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, "Invalid ID")
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid ID"})
 	}
 
 	for i, item := range tableData {

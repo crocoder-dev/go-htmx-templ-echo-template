@@ -24,12 +24,27 @@ type Item struct {
 
 func handleErrors() templ.ComponentScript {
 	return templ.ComponentScript{
-		Name: `__templ_handleErrors_64c5`,
-		Function: `function __templ_handleErrors_64c5(){document.body.addEventListener("htmx:beforeSwap", function(event) {
+		Name: `__templ_handleErrors_594f`,
+		Function: `function __templ_handleErrors_594f(){document.body.addEventListener("htmx:beforeSwap", function(event) {
 		console.log(event.detail.failed, event.detail.xhr.status, event.detail.xhr.statusText);
+		
+		try {
+			const jsonData = JSON.parse(event.detail.serverResponse);
+			if (jsonData.error) {
+				setTimeout(() => {
+					alert(jsonData.error);
+				}, 0)
+			} else if (jsonData.message) {
+				setTimeout(() => {
+					alert(jsonData.message);
+				}, 0)
+			}
+		} catch(e) {
+
+		}
 	});}`,
-		Call:       templ.SafeScript(`__templ_handleErrors_64c5`),
-		CallInline: templ.SafeScriptInline(`__templ_handleErrors_64c5`),
+		Call:       templ.SafeScript(`__templ_handleErrors_594f`),
+		CallInline: templ.SafeScriptInline(`__templ_handleErrors_594f`),
 	}
 }
 
