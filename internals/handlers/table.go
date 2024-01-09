@@ -143,7 +143,7 @@ func (a *App) CancelUpdate(c echo.Context) error {
 }
 
 func (a *App) DeleteTableData(c echo.Context) error {
-	id := c.FormValue("id")
+	id := c.QueryParam("id")
 
 	idInt, err := strconv.Atoi(id)
 	if err != nil {

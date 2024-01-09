@@ -16,16 +16,26 @@ script handleErrors() {
 	document.body.addEventListener("htmx:beforeSwap", function(event) {
 		console.log(event.detail.failed, event.detail.xhr.status, event.detail.xhr.statusText);
 		
+		const messageEl = document.querySelector("#messages");
 		try {
 			const jsonData = JSON.parse(event.detail.serverResponse);
+			const divEl = document.createElement("div");
+			divEl.classList.add("mt-2", "px-3", "py-1", "rounded-lg", "text-white", "text-white", "rounded-lg", "font-bold", "text-sm");
+
 			if (jsonData.error) {
+				divEl.classList.add("bg-red-500");
+				divEl.innerText = jsonData.error;
+				messageEl.appendChild(divEl);
 				setTimeout(() => {
-					alert(jsonData.error);
-				}, 0)
+					messageEl.removeChild(divEl);
+				}, 2000)
 			} else if (jsonData.message) {
+				divEl.classList.add("bg-green-500");
+				divEl.innerText = jsonData.message;
+				messageEl.appendChild(divEl);
 				setTimeout(() => {
-					alert(jsonData.message);
-				}, 0)
+					messageEl.removeChild(divEl);
+				}, 2000)
 			}
 		} catch(e) {
 
@@ -88,6 +98,18 @@ templ TableInputRow(row Item) {
 	</tr>
 }
 
+templ MessageItem(text string, state string) {
+	if state == "error" {
+		<div class="mt-2 px-3 py-1 rounded-lg text-white bg-red-500 text-white p-2 rounded-lg">
+			{ text }
+		</div>
+	} else if state == "success" {
+		<div class="mt-2 px-3 py-1 rounded-lg text-white bg-green-500 text-white p-2 rounded-lg">
+			{ text }
+		</div>
+	}
+}
+
 templ Table(page *Page, tableData map[int]Item) {
 	@Layout(page) {
 		<div class="px-4 py-4 mx-auto max-w-[1000px] sm:px-6 lg:px-8">
@@ -125,6 +147,7 @@ templ Table(page *Page, tableData map[int]Item) {
 			</div>
 		</div>
 		<div id="modal-holder"></div>
+		<div id="messages" class="absolute top-0 left-2/4 translate-x-[-50%] z-20"></div>
 		@handleErrors()
 	}
 }
