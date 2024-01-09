@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 	"go-htmx-templ-echo-template/internals/handlers"
+	"go-htmx-templ-echo-template/internals/templates"
+	"net/http"
 
 	"github.com/donseba/go-htmx"
 	"github.com/labstack/echo/v4"
@@ -34,9 +36,33 @@ func main() {
 	e.GET("/table/update/:slug", app.OpenUpdateRow)
 	e.POST("/table/update/:slug", app.CancelUpdate)
 
+	e.HTTPErrorHandler = HTTPErrorHandler
+
 	e.Static("/", "dist")
 
 	e.Logger.Fatal(e.Start(":3000"))
+}
+
+func HTTPErrorHandler(err error, c echo.Context) {
+	r := c.Request()
+	h := r.Context().Value(htmx.ContextRequestHeader).(htmx.HxRequestHeader)
+
+	code := http.StatusInternalServerError
+	if he, ok := err.(*echo.HTTPError); ok {
+		code = he.Code
+	}
+
+	page := &templates.Page{
+		Title:   "404 Not Found",
+		Boosted: h.HxBoosted,
+	}
+
+	if code == http.StatusNotFound {
+		components := templates.NotFound(page)
+		if err := components.Render(context.Background(), c.Response().Writer); err != nil {
+			c.Logger().Error(err)
+		}
+	}
 }
 
 func HtmxMiddleware(next echo.HandlerFunc) echo.HandlerFunc {

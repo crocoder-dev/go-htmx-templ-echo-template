@@ -22,20 +22,19 @@ script handleErrors() {
 			const divEl = document.createElement("div");
 			divEl.classList.add("mt-2", "px-3", "py-1", "rounded-lg", "text-white", "text-white", "rounded-lg", "font-bold", "text-sm");
 
+			const showMessage = (message, color) => {
+				divEl.classList.add(color);
+				divEl.innerText = message;
+				messageEl.appendChild(divEl);
+				setTimeout(() => {
+					messageEl.removeChild(divEl);
+				}, 2000)
+			}
+
 			if (jsonData.error) {
-				divEl.classList.add("bg-red-500");
-				divEl.innerText = jsonData.error;
-				messageEl.appendChild(divEl);
-				setTimeout(() => {
-					messageEl.removeChild(divEl);
-				}, 2000)
+				showMessage(jsonData.error, "bg-red-500");
 			} else if (jsonData.message) {
-				divEl.classList.add("bg-green-500");
-				divEl.innerText = jsonData.message;
-				messageEl.appendChild(divEl);
-				setTimeout(() => {
-					messageEl.removeChild(divEl);
-				}, 2000)
+				showMessage(jsonData.message, "bg-green-500");
 			}
 		} catch(e) {
 

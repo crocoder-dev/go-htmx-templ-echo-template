@@ -24,8 +24,8 @@ type Item struct {
 
 func handleErrors() templ.ComponentScript {
 	return templ.ComponentScript{
-		Name: `__templ_handleErrors_37b0`,
-		Function: `function __templ_handleErrors_37b0(){document.body.addEventListener("htmx:beforeSwap", function(event) {
+		Name: `__templ_handleErrors_89f6`,
+		Function: `function __templ_handleErrors_89f6(){document.body.addEventListener("htmx:beforeSwap", function(event) {
 		console.log(event.detail.failed, event.detail.xhr.status, event.detail.xhr.statusText);
 		
 		const messageEl = document.querySelector("#messages");
@@ -34,27 +34,26 @@ func handleErrors() templ.ComponentScript {
 			const divEl = document.createElement("div");
 			divEl.classList.add("mt-2", "px-3", "py-1", "rounded-lg", "text-white", "text-white", "rounded-lg", "font-bold", "text-sm");
 
-			if (jsonData.error) {
-				divEl.classList.add("bg-red-500");
-				divEl.innerText = jsonData.error;
-				messageEl.appendChild(divEl);
-				setTimeout(() => {
-					messageEl.removeChild(divEl);
-				}, 2000)
-			} else if (jsonData.message) {
-				divEl.classList.add("bg-green-500");
-				divEl.innerText = jsonData.message;
+			const showMessage = (message, color) => {
+				divEl.classList.add(color);
+				divEl.innerText = message;
 				messageEl.appendChild(divEl);
 				setTimeout(() => {
 					messageEl.removeChild(divEl);
 				}, 2000)
 			}
+
+			if (jsonData.error) {
+				showMessage(jsonData.error, "bg-red-500");
+			} else if (jsonData.message) {
+				showMessage(jsonData.message, "bg-green-500");
+			}
 		} catch(e) {
 
 		}
 	});}`,
-		Call:       templ.SafeScript(`__templ_handleErrors_37b0`),
-		CallInline: templ.SafeScriptInline(`__templ_handleErrors_37b0`),
+		Call:       templ.SafeScript(`__templ_handleErrors_89f6`),
+		CallInline: templ.SafeScriptInline(`__templ_handleErrors_89f6`),
 	}
 }
 
