@@ -82,29 +82,27 @@ func (a *App) UpdateTableData(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid ID"})
 	}
 
-	for i, item := range tableData {
-		if item.ID == idInt {
-			if formName != "" && formName != item.Name {
-				item.Name = formName
-			}
-
-			if formAgeStr != "" && ageInt != item.Age {
-				item.Age = ageInt
-			}
-
-			if formCity != "" && formCity != item.City {
-				item.City = formCity
-			}
-
-			if formState != "" && formState != item.State {
-				item.State = formState
-			}
-
-			tableData[i] = item
-			c.Response().Header().Set("HX-Push-Url", "/table")
-			components := templates.TableRow(item)
-			return components.Render(context.Background(), c.Response().Writer)
+	if item, ok := tableData[idInt]; ok {
+		if formName != "" && formName != item.Name {
+			item.Name = formName
 		}
+
+		if formAgeStr != "" && ageInt != item.Age {
+			item.Age = ageInt
+		}
+
+		if formCity != "" && formCity != item.City {
+			item.City = formCity
+		}
+
+		if formState != "" && formState != item.State {
+			item.State = formState
+		}
+
+		tableData[idInt] = item
+		c.Response().Header().Set("HX-Push-Url", "/table")
+		components := templates.TableRow(item)
+		return components.Render(context.Background(), c.Response().Writer)
 	}
 
 	// If the item is not found, return 404 Not Found
@@ -150,11 +148,9 @@ func (a *App) DeleteTableData(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, "Invalid ID")
 	}
 
-	for _, item := range tableData {
-		if item.ID == idInt {
-			delete(tableData, idInt)
-			return c.JSON(http.StatusOK, map[string]string{"message": "Item deleted"})
-		}
+	if _, ok := tableData[idInt]; ok {
+		delete(tableData, idInt)
+		return c.JSON(http.StatusOK, map[string]string{"message": "Item deleted"})
 	}
 
 	return c.JSON(http.StatusNotFound, map[string]string{"error": "Item not found"})
@@ -163,4 +159,8 @@ func (a *App) DeleteTableData(c echo.Context) error {
 func (a *App) ShowModal(c echo.Context) error {
 	components := templates.Modal()
 	return components.Render(context.Background(), c.Response().Writer)
+}
+
+func (a *App) CloseModal(c echo.Context) error {
+	return c.NoContent(http.StatusOK)
 }
