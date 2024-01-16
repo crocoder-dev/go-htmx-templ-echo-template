@@ -69,8 +69,11 @@ templ Modal() {
 	</div>
 }
 
-templ TableRow(row Item) {
+templ TableRow(row Item, removeModal bool) {
 	<tr id={ "row-" + strconv.Itoa(row.ID) } class="text-center">
+		if removeModal {
+			<td hx-swap-oob="delete:#modal"></td>
+		}
 		<td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-0">{ strconv.Itoa(row.ID) }</td>
 		<td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{ row.Name }</td>
 		<td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{ strconv.Itoa(row.Age) }</td>
@@ -140,7 +143,7 @@ templ Table(page *Page, tableData map[int]Item, addUserTrigger string, updateID 
 									if (updateID != nil && *updateID == row.ID) {
 										@TableInputRow(row)
 									} else {
-										@TableRow(row)
+										@TableRow(row, false)
 									}
 								}
 							</tbody>

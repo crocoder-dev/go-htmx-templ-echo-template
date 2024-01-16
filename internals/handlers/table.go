@@ -64,7 +64,7 @@ func (a *App) CreateTableData(c echo.Context) error {
 
 	tableData[newItem.ID] = newItem
 
-	components := templates.TableRow(newItem)
+	components := templates.TableRow(newItem, true)
 	return components.Render(context.Background(), c.Response().Writer)
 }
 
@@ -105,7 +105,7 @@ func (a *App) UpdateTableData(c echo.Context) error {
 
 		tableData[idInt] = item
 		c.Response().Header().Set("HX-Push-Url", "/table")
-		components := templates.TableRow(item)
+		components := templates.TableRow(item, false)
 		return components.Render(context.Background(), c.Response().Writer)
 	}
 
@@ -154,7 +154,7 @@ func (a *App) CancelUpdate(c echo.Context) error {
 	for _, item := range tableData {
 		if item.ID == idInt {
 			c.Response().Header().Set("HX-Push-Url", "/table")
-			components := templates.TableRow(item)
+			components := templates.TableRow(item, false)
 			return components.Render(context.Background(), c.Response().Writer)
 		}
 	}

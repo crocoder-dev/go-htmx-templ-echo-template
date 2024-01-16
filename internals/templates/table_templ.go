@@ -126,7 +126,7 @@ func Modal() templ.Component {
 	})
 }
 
-func TableRow(row Item) templ.Component {
+func TableRow(row Item, removeModal bool) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {
@@ -147,7 +147,17 @@ func TableRow(row Item) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" class=\"text-center\"><td class=\"whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-0\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" class=\"text-center\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if removeModal {
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<td hx-swap-oob=\"delete:#modal\"></td>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<td class=\"whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-0\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -520,7 +530,7 @@ func Table(page *Page, tableData map[int]Item, addUserTrigger string, updateID *
 						return templ_7745c5c3_Err
 					}
 				} else {
-					templ_7745c5c3_Err = TableRow(row).Render(ctx, templ_7745c5c3_Buffer)
+					templ_7745c5c3_Err = TableRow(row, false).Render(ctx, templ_7745c5c3_Buffer)
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
