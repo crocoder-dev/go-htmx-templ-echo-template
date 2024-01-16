@@ -109,7 +109,7 @@ templ MessageItem(text string, state string) {
 	}
 }
 
-templ Table(page *Page, tableData map[int]Item) {
+templ Table(page *Page, tableData map[int]Item, addUserTrigger string, updateID *int) {
 	@Layout(page) {
 		<div class="px-4 py-4 mx-auto max-w-[1000px] sm:px-6 lg:px-8">
 			<div class="sm:flex sm:items-center">
@@ -118,7 +118,7 @@ templ Table(page *Page, tableData map[int]Item) {
 					<p class="mt-2 text-sm text-gray-700">A list of all the users in your account including their name, title, email and role.</p>
 				</div>
 				<div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
-					<button hx-get="/table/new" hx-target="#modal-holder" hx-push-url="true" class="block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Add user</button>
+					<button hx-get="/table/new" hx-target="#modal-holder" hx-push-url="true" hx-trigger={addUserTrigger} class="block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Add user</button>
 				</div>
 			</div>
 			<div class="mt-8 flow-root">
@@ -137,7 +137,11 @@ templ Table(page *Page, tableData map[int]Item) {
 							</thead>
 							<tbody class="divide-y divide-gray-200" id="table-body">
 								for _, row := range tableData {
-									@TableRow(row)
+									if (updateID != nil && *updateID == row.ID) {
+										@TableInputRow(row)
+									} else {
+										@TableRow(row)
+									}
 								}
 							</tbody>
 						</table>

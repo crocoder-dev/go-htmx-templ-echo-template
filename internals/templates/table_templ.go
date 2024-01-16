@@ -401,7 +401,7 @@ func MessageItem(text string, state string) templ.Component {
 	})
 }
 
-func Table(page *Page, tableData map[int]Item) templ.Component {
+func Table(page *Page, tableData map[int]Item, addUserTrigger string, updateID *int) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {
@@ -438,7 +438,15 @@ func Table(page *Page, tableData map[int]Item) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p></div><div class=\"mt-4 sm:ml-16 sm:mt-0 sm:flex-none\"><button hx-get=\"/table/new\" hx-target=\"#modal-holder\" hx-push-url=\"true\" class=\"block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p></div><div class=\"mt-4 sm:ml-16 sm:mt-0 sm:flex-none\"><button hx-get=\"/table/new\" hx-target=\"#modal-holder\" hx-push-url=\"true\" hx-trigger=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(addUserTrigger))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" class=\"block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -506,9 +514,16 @@ func Table(page *Page, tableData map[int]Item) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			for _, row := range tableData {
-				templ_7745c5c3_Err = TableRow(row).Render(ctx, templ_7745c5c3_Buffer)
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
+				if updateID != nil && *updateID == row.ID {
+					templ_7745c5c3_Err = TableInputRow(row).Render(ctx, templ_7745c5c3_Buffer)
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+				} else {
+					templ_7745c5c3_Err = TableRow(row).Render(ctx, templ_7745c5c3_Buffer)
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
 				}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</tbody></table></div></div></div></div><div id=\"modal-holder\"></div><div id=\"messages\" class=\"absolute top-0 left-2/4 translate-x-[-50%] z-20\"></div>")

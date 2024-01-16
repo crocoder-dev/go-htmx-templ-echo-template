@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"fmt"
 	"go-htmx-templ-echo-template/internals/templates"
 	"strconv"
 
@@ -18,8 +19,19 @@ func (a *App) Table(c echo.Context) error {
 	r := c.Request()
 	h := r.Context().Value(htmx.ContextRequestHeader).(htmx.HxRequestHeader)
 
-	tableData = make(map[int]templates.Item)
+	page := &templates.Page{
+		Title:   "Table",
+		Boosted: h.HxBoosted,
+	}
+	addData()
+
+	components := templates.Table(page, tableData, "click", nil)
+	return components.Render(context.Background(), c.Response().Writer)
+}
+
+func addData() {
 	id = 0
+	tableData = make(map[int]templates.Item)
 	tableData[id] = templates.Item{
 		ID:    id,
 		Name:  "Dean",
@@ -28,14 +40,6 @@ func (a *App) Table(c echo.Context) error {
 		State: "NY",
 	}
 	id++
-
-	page := &templates.Page{
-		Title:   "Table",
-		Boosted: h.HxBoosted,
-	}
-
-	components := templates.Table(page, tableData)
-	return components.Render(context.Background(), c.Response().Writer)
 }
 
 func (a *App) CreateTableData(c echo.Context) error {
@@ -110,10 +114,27 @@ func (a *App) UpdateTableData(c echo.Context) error {
 }
 
 func (a *App) OpenUpdateRow(c echo.Context) error {
+	r := c.Request()
+	h := r.Context().Value(htmx.ContextRequestHeader).(htmx.HxRequestHeader)
 	id := c.Param("slug")
 	idInt, err := strconv.Atoi(id)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, "Invalid ID")
+	}
+	var req = c.Request().Header.Get("HX-Request")
+	fmt.Println("__________________________req", req)
+	if req != "true" {
+		if len(tableData) == 0 {
+			addData()
+		}
+
+		page := &templates.Page{
+			Title:   "Table",
+			Boosted: h.HxBoosted,
+		}
+
+		components := templates.Table(page, tableData, "click", &idInt)
+		return components.Render(context.Background(), c.Response().Writer)
 	}
 	for _, item := range tableData {
 		if item.ID == idInt {
@@ -157,6 +178,22 @@ func (a *App) DeleteTableData(c echo.Context) error {
 }
 
 func (a *App) ShowModal(c echo.Context) error {
+	r := c.Request()
+	h := r.Context().Value(htmx.ContextRequestHeader).(htmx.HxRequestHeader)
+	var req = c.Request().Header.Get("HX-Request")
+	fmt.Println("__________________________req", req)
+	if req != "true" {
+		if len(tableData) == 0 {
+			addData()
+		}
+		page := &templates.Page{
+			Title:   "Table",
+			Boosted: h.HxBoosted,
+		}
+
+		components := templates.Table(page, tableData, "load", nil)
+		return components.Render(context.Background(), c.Response().Writer)
+	}
 	components := templates.Modal()
 	return components.Render(context.Background(), c.Response().Writer)
 }
