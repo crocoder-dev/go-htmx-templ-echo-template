@@ -71,7 +71,7 @@ templ Modal() {
 templ TableRow(row Item, removeModal bool) {
 	<div id={ "row-" + strconv.Itoa(row.ID) } class="table-row text-center border-b border-gray-300">
 		if removeModal {
-			<td hx-swap-oob="delete:#modal"></td>
+			<div hx-swap-oob="delete:#modal"></div>
 		}
 		<div class="table-cell whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-0">{ strconv.Itoa(row.ID) }</div>
 		<div class="table-cell whitespace-nowrap px-3 py-4 text-sm text-gray-500">{ row.Name }</div>

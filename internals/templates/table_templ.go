@@ -143,7 +143,7 @@ func TableRow(row Item, removeModal bool) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		if removeModal {
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<td hx-swap-oob=\"delete:#modal\"></td>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div hx-swap-oob=\"delete:#modal\"></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
