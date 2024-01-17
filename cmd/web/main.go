@@ -34,8 +34,8 @@ func main() {
 	e.DELETE("/users/new", app.CloseModal)
 	e.GET("/users/new", app.ShowModal)
 
-	e.GET("/users/update/:slug", app.OpenUpdateRow)
-	e.POST("/users/update/:slug", app.CancelUpdate)
+	e.GET("/users/update/:id", app.OpenUpdateRow)
+	e.POST("/users/update/:id", app.CancelUpdate)
 
 	e.HTTPErrorHandler = HTTPErrorHandler
 

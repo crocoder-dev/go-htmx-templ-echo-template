@@ -182,7 +182,7 @@ func Navigation() templ.Component {
 			templ_7745c5c3_Var9 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<nav hx-boost=\"true\" hx-target=\"main\" hx-swap=\"outerHTML show:unset\" class=\"flex gap-2 bg-indigo-600 p-4\"><a href=\"/\" class=\"text-white font-bold hover:text-indigo-200\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<nav hx-boost=\"true\" hx-target=\"main\" hx-swap=\"outerHTML show:unset\" class=\"flex bg-indigo-600\"><a href=\"/\" class=\"inline-block py-3 px-2 text-white font-bold hover:bg-indigo-400\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -191,7 +191,7 @@ func Navigation() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</a> <a href=\"/about\" class=\"text-white font-bold hover:text-indigo-200\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</a> <a href=\"/about\" class=\"inline-block py-3 px-2 text-white font-bold hover:bg-indigo-400\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -200,7 +200,7 @@ func Navigation() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</a> <a href=\"/users\" class=\"text-white font-bold hover:text-indigo-200\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</a> <a href=\"/users\" class=\"inline-block py-3 px-2 text-white font-bold hover:bg-indigo-400\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

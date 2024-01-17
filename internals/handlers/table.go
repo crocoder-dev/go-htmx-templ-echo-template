@@ -40,15 +40,14 @@ func (a *App) TablePage(c echo.Context) error {
 	h := r.Context().Value(htmx.ContextRequestHeader).(htmx.HxRequestHeader)
 
 	page := &templates.Page{
-		Title:   "Table",
+		Title:   "Users demo",
 		Boosted: h.HxBoosted,
 	}
 	addData()
 
-	components := templates.Table(page, tableData, "click", nil)
+	components := templates.Table(page, tableData, false, nil)
 	return components.Render(context.Background(), c.Response().Writer)
 }
-
 
 func (a *App) CreateRow(c echo.Context) error {
 	name := c.FormValue("name")
@@ -78,7 +77,7 @@ func (a *App) CreateRow(c echo.Context) error {
 
 func (a *App) UpdateRow(c echo.Context) error {
 	// Retrieve form values
-	id := c.QueryParam("id")
+	id := c.FormValue("id")
 	formName := c.FormValue("name")
 	formAgeStr := c.FormValue("age")
 	formCity := c.FormValue("city")
@@ -146,11 +145,11 @@ func (a *App) ShowModal(c echo.Context) error {
 			addData()
 		}
 		page := &templates.Page{
-			Title:   "Table",
+			Title:   "Users demo",
 			Boosted: h.HxBoosted,
 		}
 
-		components := templates.Table(page, tableData, "load", nil)
+		components := templates.Table(page, tableData, true, nil)
 		return components.Render(context.Background(), c.Response().Writer)
 	}
 	components := templates.Modal()
@@ -165,7 +164,7 @@ func (a *App) CloseModal(c echo.Context) error {
 func (a *App) OpenUpdateRow(c echo.Context) error {
 	r := c.Request()
 	h := r.Context().Value(htmx.ContextRequestHeader).(htmx.HxRequestHeader)
-	id := c.Param("slug")
+	id := c.Param("id")
 	idInt, err := strconv.Atoi(id)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, "Invalid ID")
@@ -177,11 +176,11 @@ func (a *App) OpenUpdateRow(c echo.Context) error {
 		}
 
 		page := &templates.Page{
-			Title:   "Table",
+			Title:   "Users demo",
 			Boosted: h.HxBoosted,
 		}
 
-		components := templates.Table(page, tableData, "click", &idInt)
+		components := templates.Table(page, tableData, false, &idInt)
 		return components.Render(context.Background(), c.Response().Writer)
 	}
 	for _, item := range tableData {
@@ -194,7 +193,7 @@ func (a *App) OpenUpdateRow(c echo.Context) error {
 }
 
 func (a *App) CancelUpdate(c echo.Context) error {
-	id := c.Param("slug")
+	id := c.Param("id")
 	idInt, err := strconv.Atoi(id)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, "Invalid ID")
@@ -208,5 +207,3 @@ func (a *App) CancelUpdate(c echo.Context) error {
 	}
 	return c.JSON(http.StatusNotFound, map[string]string{"error": "Item update cancel failed"})
 }
-
-
