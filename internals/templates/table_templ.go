@@ -138,7 +138,7 @@ func TableRow(row Item, removeModal bool) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" class=\"table-row text-center\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" class=\"table-row text-center border-b border-gray-300\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -283,7 +283,7 @@ func TableInputRow(row Item) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-swap=\"outerHTML\" class=\"table-row m-0 text-center\"><div class=\"table-cell pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-0\"><input type=\"text\" name=\"id\" readonly value=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-swap=\"outerHTML\" class=\"table-row m-0 text-center border-b border-gray-300\"><div class=\"table-cell pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-0\"><input type=\"text\" name=\"id\" readonly value=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -291,7 +291,7 @@ func TableInputRow(row Item) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" class=\"max-w-[150px] text-center text-sm font-medium text-gray-900\"></div><div class=\"table-cell\"><input type=\"text\" name=\"name\" class=\"pl-2 max-w-[150px] rounded-md border-2 py-1.5 border-gray-400\" placeholder=\"Name\" value=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" class=\"max-w-[150px] text-center text-sm font-medium text-gray-900\"></div><div class=\"table-cell p-1\"><input type=\"text\" name=\"name\" class=\"pl-2 max-w-[150px] rounded-md border-2 py-1.5 border-gray-400\" placeholder=\"Name\" value=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -299,7 +299,7 @@ func TableInputRow(row Item) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"></div><div class=\"table-cell\"><input type=\"number\" name=\"age\" class=\"pl-2 max-w-[150px] rounded-md border-2 py-1.5 border-gray-400\" placeholder=\"Age\" value=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"></div><div class=\"table-cell p-1\"><input type=\"number\" name=\"age\" class=\"pl-2 max-w-[150px] rounded-md border-2 py-1.5 border-gray-400\" placeholder=\"Age\" value=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -307,7 +307,7 @@ func TableInputRow(row Item) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"></div><div class=\"table-cell\"><input type=\"text\" name=\"city\" class=\"pl-2 max-w-[150px] rounded-md border-2 py-1.5 border-gray-400\" placeholder=\"City\" value=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"></div><div class=\"table-cell p-1\"><input type=\"text\" name=\"city\" class=\"pl-2 max-w-[150px] rounded-md border-2 py-1.5 border-gray-400\" placeholder=\"City\" value=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -315,7 +315,7 @@ func TableInputRow(row Item) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"></div><div class=\"table-cell\"><input type=\"text\" name=\"state\" class=\"pl-2 max-w-[150px] rounded-md border-2 py-1.5 border-gray-400\" placeholder=\"State\" value=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"></div><div class=\"table-cell p-1\"><input type=\"text\" name=\"state\" class=\"pl-2 max-w-[150px] rounded-md border-2 py-1.5 border-gray-400\" placeholder=\"State\" value=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -445,7 +445,7 @@ func Table(page *Page, tableData map[int]Item, showModal bool, updateID *int) te
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</button></div></div><div class=\"mt-8 flow-root\"><div class=\"-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8\"><div class=\"inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8\"><div id=\"users-list\" class=\"table min-w-full divide-y divide-gray-300\"><div class=\"table-row text-center\"><div class=\"table-cell py-3.5 pl-4 pr-3 text-sm font-semibold text-gray-900 sm:pl-0\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</button></div></div><div class=\"mt-8 flow-root\"><div class=\"-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8\"><div class=\"inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8\"><div id=\"users-list\" class=\"table min-w-full border-collapse\"><div class=\"table-row text-center border-b border-gray-300\"><div class=\"table-cell py-3.5 pl-4 pr-3 text-sm font-semibold text-gray-900 sm:pl-0\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
