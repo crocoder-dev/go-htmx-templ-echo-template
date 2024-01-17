@@ -25,16 +25,17 @@ func main() {
 	e.GET("/", app.Home)
 	e.GET("/about", app.About)
 
-	e.GET("/table", app.Table)
-	e.POST("/table", app.CreateTableData)
-	e.PUT("/table", app.UpdateTableData)
-	e.DELETE("/table", app.DeleteTableData)
-	e.PATCH("/table", app.CloseModal)
+	e.GET("/users", app.TablePage)
 
-	e.GET("/table/new", app.ShowModal)
+	e.POST("/users", app.CreateRow)
+	e.PUT("/users", app.UpdateRow)
+	e.DELETE("/users", app.DeleteRow)
 
-	e.GET("/table/update/:slug", app.OpenUpdateRow)
-	e.POST("/table/update/:slug", app.CancelUpdate)
+	e.DELETE("/users/new", app.CloseModal)
+	e.GET("/users/new", app.ShowModal)
+
+	e.GET("/users/update/:slug", app.OpenUpdateRow)
+	e.POST("/users/update/:slug", app.CancelUpdate)
 
 	e.HTTPErrorHandler = HTTPErrorHandler
 

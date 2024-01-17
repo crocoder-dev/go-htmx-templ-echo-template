@@ -23,7 +23,7 @@ templ Head(title string) {
 	<head>
 		<meta charset="UTF-8"/>
 		<title>{ title }</title>
-		<script src="https://unpkg.com/htmx.org@1.9.6/dist/htmx.min.js"></script>
+		<script src="https://unpkg.com/htmx.org@1.9.6/dist/htmx.js"></script>
 		<script src="https://unpkg.com/htmx.org@1.9.6/dist/ext/head-support.js"></script>
 		<link href="/style.css" rel="stylesheet"/>
 		<script>
@@ -41,7 +41,7 @@ templ Navigation() {
 	<nav hx-boost="true" hx-target="main" hx-swap="outerHTML show:unset" class="flex gap-2 bg-indigo-600 p-4">
 		<a href="/" class="text-white font-bold hover:text-indigo-200">Home</a>
 		<a href="/about" class="text-white font-bold hover:text-indigo-200">About</a>
-		<a href="/table" class="text-white font-bold hover:text-indigo-200">Table</a>
+		<a href="/users" class="text-white font-bold hover:text-indigo-200">Users Demo</a>
 	</nav>
 }
 

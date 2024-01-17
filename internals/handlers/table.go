@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"context"
-	"fmt"
 	"go-htmx-templ-echo-template/internals/templates"
 	"strconv"
 
@@ -15,7 +14,28 @@ import (
 var tableData map[int]templates.Item
 var id int
 
-func (a *App) Table(c echo.Context) error {
+func addData() {
+	id = 0
+	tableData = make(map[int]templates.Item)
+	tableData[id] = templates.Item{
+		ID:    id,
+		Name:  "Dean",
+		Age:   28,
+		City:  "New York",
+		State: "NY",
+	}
+	id++
+	tableData[id] = templates.Item{
+		ID:    id,
+		Name:  "Sam",
+		Age:   26,
+		City:  "New York",
+		State: "NY",
+	}
+	id++
+}
+
+func (a *App) TablePage(c echo.Context) error {
 	r := c.Request()
 	h := r.Context().Value(htmx.ContextRequestHeader).(htmx.HxRequestHeader)
 
@@ -29,20 +49,8 @@ func (a *App) Table(c echo.Context) error {
 	return components.Render(context.Background(), c.Response().Writer)
 }
 
-func addData() {
-	id = 0
-	tableData = make(map[int]templates.Item)
-	tableData[id] = templates.Item{
-		ID:    id,
-		Name:  "Dean",
-		Age:   28,
-		City:  "New York",
-		State: "NY",
-	}
-	id++
-}
 
-func (a *App) CreateTableData(c echo.Context) error {
+func (a *App) CreateRow(c echo.Context) error {
 	name := c.FormValue("name")
 	ageStr := c.FormValue("age")
 	city := c.FormValue("city")
@@ -68,7 +76,7 @@ func (a *App) CreateTableData(c echo.Context) error {
 	return components.Render(context.Background(), c.Response().Writer)
 }
 
-func (a *App) UpdateTableData(c echo.Context) error {
+func (a *App) UpdateRow(c echo.Context) error {
 	// Retrieve form values
 	id := c.QueryParam("id")
 	formName := c.FormValue("name")
@@ -104,13 +112,54 @@ func (a *App) UpdateTableData(c echo.Context) error {
 		}
 
 		tableData[idInt] = item
-		c.Response().Header().Set("HX-Push-Url", "/table")
+		c.Response().Header().Set("HX-Push-Url", "/users")
 		components := templates.TableRow(item, false)
 		return components.Render(context.Background(), c.Response().Writer)
 	}
 
 	// If the item is not found, return 404 Not Found
 	return c.JSON(http.StatusNotFound, map[string]string{"error": "Item not found"})
+}
+
+func (a *App) DeleteRow(c echo.Context) error {
+	id := c.QueryParam("id")
+
+	idInt, err := strconv.Atoi(id)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, "Invalid ID")
+	}
+
+	if _, ok := tableData[idInt]; ok {
+		delete(tableData, idInt)
+		return c.JSON(http.StatusOK, map[string]string{"message": "Item deleted"})
+	}
+
+	return c.JSON(http.StatusNotFound, map[string]string{"error": "Item not found"})
+}
+
+func (a *App) ShowModal(c echo.Context) error {
+	r := c.Request()
+	h := r.Context().Value(htmx.ContextRequestHeader).(htmx.HxRequestHeader)
+	var req = c.Request().Header.Get("HX-Request")
+	if req != "true" {
+		if len(tableData) == 0 {
+			addData()
+		}
+		page := &templates.Page{
+			Title:   "Table",
+			Boosted: h.HxBoosted,
+		}
+
+		components := templates.Table(page, tableData, "load", nil)
+		return components.Render(context.Background(), c.Response().Writer)
+	}
+	components := templates.Modal()
+	return components.Render(context.Background(), c.Response().Writer)
+}
+
+func (a *App) CloseModal(c echo.Context) error {
+	c.Response().Header().Set("HX-Push-Url", "/users")
+	return c.NoContent(http.StatusOK)
 }
 
 func (a *App) OpenUpdateRow(c echo.Context) error {
@@ -122,7 +171,6 @@ func (a *App) OpenUpdateRow(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, "Invalid ID")
 	}
 	var req = c.Request().Header.Get("HX-Request")
-	fmt.Println("__________________________req", req)
 	if req != "true" {
 		if len(tableData) == 0 {
 			addData()
@@ -153,7 +201,7 @@ func (a *App) CancelUpdate(c echo.Context) error {
 	}
 	for _, item := range tableData {
 		if item.ID == idInt {
-			c.Response().Header().Set("HX-Push-Url", "/table")
+			c.Response().Header().Set("HX-Push-Url", "/users")
 			components := templates.TableRow(item, false)
 			return components.Render(context.Background(), c.Response().Writer)
 		}
@@ -161,43 +209,4 @@ func (a *App) CancelUpdate(c echo.Context) error {
 	return c.JSON(http.StatusNotFound, map[string]string{"error": "Item update cancel failed"})
 }
 
-func (a *App) DeleteTableData(c echo.Context) error {
-	id := c.QueryParam("id")
 
-	idInt, err := strconv.Atoi(id)
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, "Invalid ID")
-	}
-
-	if _, ok := tableData[idInt]; ok {
-		delete(tableData, idInt)
-		return c.JSON(http.StatusOK, map[string]string{"message": "Item deleted"})
-	}
-
-	return c.JSON(http.StatusNotFound, map[string]string{"error": "Item not found"})
-}
-
-func (a *App) ShowModal(c echo.Context) error {
-	r := c.Request()
-	h := r.Context().Value(htmx.ContextRequestHeader).(htmx.HxRequestHeader)
-	var req = c.Request().Header.Get("HX-Request")
-	fmt.Println("__________________________req", req)
-	if req != "true" {
-		if len(tableData) == 0 {
-			addData()
-		}
-		page := &templates.Page{
-			Title:   "Table",
-			Boosted: h.HxBoosted,
-		}
-
-		components := templates.Table(page, tableData, "load", nil)
-		return components.Render(context.Background(), c.Response().Writer)
-	}
-	components := templates.Modal()
-	return components.Render(context.Background(), c.Response().Writer)
-}
-
-func (a *App) CloseModal(c echo.Context) error {
-	return c.NoContent(http.StatusOK)
-}
