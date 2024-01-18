@@ -139,19 +139,29 @@ func (a *App) DeleteRow(c echo.Context) error {
 func (a *App) ShowModal(c echo.Context) error {
 	r := c.Request()
 	h := r.Context().Value(htmx.ContextRequestHeader).(htmx.HxRequestHeader)
+
+	page := &templates.Page{
+		Title:   "Users demo",
+		Boosted: h.HxBoosted,
+	}
+
 	var req = c.Request().Header.Get("HX-Request")
 	if req != "true" {
 		if len(tableData) == 0 {
 			addData()
 		}
-		page := &templates.Page{
-			Title:   "Users demo",
-			Boosted: h.HxBoosted,
-		}
 
 		components := templates.Table(page, tableData, true, nil)
 		return components.Render(context.Background(), c.Response().Writer)
 	}
+
+	// var referer = c.Request().Header.Get("Referer")
+	// u, _ := url.Parse(referer)
+	// if u.Path != "/users" {
+	// 	components := templates.Table(page, tableData, true, nil)
+	// 	return components.Render(context.Background(), c.Response().Writer)
+	// }
+
 	components := templates.Modal()
 	return components.Render(context.Background(), c.Response().Writer)
 }
@@ -185,7 +195,7 @@ func (a *App) OpenUpdateRow(c echo.Context) error {
 	}
 	for _, item := range tableData {
 		if item.ID == idInt {
-			components := templates.TableInputRow(item)
+			components := templates.UsersList(tableData, &idInt)
 			return components.Render(context.Background(), c.Response().Writer)
 		}
 	}
