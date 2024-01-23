@@ -155,13 +155,6 @@ func (a *App) ShowModal(c echo.Context) error {
 		return components.Render(context.Background(), c.Response().Writer)
 	}
 
-	// var referer = c.Request().Header.Get("Referer")
-	// u, _ := url.Parse(referer)
-	// if u.Path != "/users" {
-	// 	components := templates.Table(page, tableData, true, nil)
-	// 	return components.Render(context.Background(), c.Response().Writer)
-	// }
-
 	components := templates.Modal()
 	return components.Render(context.Background(), c.Response().Writer)
 }
@@ -193,11 +186,9 @@ func (a *App) OpenUpdateRow(c echo.Context) error {
 		components := templates.Table(page, tableData, false, &idInt)
 		return components.Render(context.Background(), c.Response().Writer)
 	}
-	for _, item := range tableData {
-		if item.ID == idInt {
-			components := templates.UsersList(tableData, &idInt)
-			return components.Render(context.Background(), c.Response().Writer)
-		}
+	if _, ok := tableData[idInt]; ok {
+		components := templates.UsersList(tableData, &idInt)
+		return components.Render(context.Background(), c.Response().Writer)
 	}
 	return c.JSON(http.StatusNotFound, map[string]string{"error": "Item not found"})
 }
@@ -208,12 +199,11 @@ func (a *App) CancelUpdate(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, "Invalid ID")
 	}
-	for _, item := range tableData {
-		if item.ID == idInt {
-			c.Response().Header().Set("HX-Push-Url", "/users")
-			components := templates.TableRow(item, false)
-			return components.Render(context.Background(), c.Response().Writer)
-		}
+	if item, ok := tableData[idInt]; ok {
+		c.Response().Header().Set("HX-Push-Url", "/users")
+		components := templates.TableRow(item, false)
+		return components.Render(context.Background(), c.Response().Writer)
 	}
 	return c.JSON(http.StatusNotFound, map[string]string{"error": "Item update cancel failed"})
+
 }
