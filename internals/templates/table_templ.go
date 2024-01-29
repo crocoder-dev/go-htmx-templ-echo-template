@@ -14,12 +14,12 @@ import (
 	"strconv"
 )
 
-type Item struct {
-	ID    int    `json:"id"`
-	Name  string `json:"name"`
-	Age   int    `json:"age"`
-	City  string `json:"city"`
-	State string `json:"state"`
+type User struct {
+	ID    int
+	Name  string
+	Age   int
+	City  string
+	State string
 }
 
 func handleErrors() templ.ComponentScript {
@@ -117,7 +117,7 @@ func Modal() templ.Component {
 	})
 }
 
-func TableRow(row Item, removeModal bool) templ.Component {
+func UserRow(row User, removeModal bool) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {
@@ -246,7 +246,7 @@ func TableRow(row Item, removeModal bool) templ.Component {
 	})
 }
 
-func TableInputRow(row Item) templ.Component {
+func UserInputRow(row User) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {
@@ -391,7 +391,7 @@ func MessageItem(text string, state string) templ.Component {
 	})
 }
 
-func UsersList(tableData map[int]Item, updateID *int) templ.Component {
+func UsersList(usersData map[int]User, updateID *int) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {
@@ -462,14 +462,14 @@ func UsersList(tableData map[int]Item, updateID *int) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		for _, row := range tableData {
+		for _, row := range usersData {
 			if updateID != nil && *updateID == row.ID {
-				templ_7745c5c3_Err = TableInputRow(row).Render(ctx, templ_7745c5c3_Buffer)
+				templ_7745c5c3_Err = UserInputRow(row).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			} else {
-				templ_7745c5c3_Err = TableRow(row, false).Render(ctx, templ_7745c5c3_Buffer)
+				templ_7745c5c3_Err = UserRow(row, false).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -486,7 +486,7 @@ func UsersList(tableData map[int]Item, updateID *int) templ.Component {
 	})
 }
 
-func Table(page *Page, tableData map[int]Item, showModal bool, updateID *int) templ.Component {
+func Users(page *Page, usersData map[int]User, showModal bool, updateID *int) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {
@@ -536,7 +536,7 @@ func Table(page *Page, tableData map[int]Item, showModal bool, updateID *int) te
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = UsersList(tableData, updateID).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = UsersList(usersData, updateID).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

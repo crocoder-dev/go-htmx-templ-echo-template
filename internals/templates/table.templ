@@ -4,12 +4,12 @@ import (
 	"strconv"
 )
 
-type Item struct {
-	ID    int    `json:"id"`
-	Name  string `json:"name"`
-	Age   int    `json:"age"`
-	City  string `json:"city"`
-	State string `json:"state"`
+type User struct {
+	ID    int    
+	Name  string
+	Age   int   
+	City  string
+	State string
 }
 
 script handleErrors() {
@@ -68,7 +68,7 @@ templ Modal() {
 	</div>
 }
 
-templ TableRow(row Item, removeModal bool) {
+templ UserRow(row User, removeModal bool) {
 	<div id={ "row-" + strconv.Itoa(row.ID) } class="table-row text-center border-b border-gray-300">
 		if removeModal {
 			<div hx-swap-oob="delete:#modal"></div>
@@ -85,7 +85,7 @@ templ TableRow(row Item, removeModal bool) {
 	</div>
 }
 
-templ TableInputRow(row Item) {
+templ UserInputRow(row User) {
 	<form
 		id={ "row-" + strconv.Itoa(row.ID) }
 		hx-put="/users"
@@ -164,7 +164,7 @@ templ MessageItem(text string, state string) {
 	}
 }
 
-templ UsersList(tableData map[int]Item, updateID *int) {
+templ UsersList(usersData map[int]User, updateID *int) {
 	<div id="users-list" class="table min-w-full border-collapse">
 		<div class="table-row text-center border-b border-gray-300">
 			<div class="table-cell py-3.5 pl-4 pr-3 text-sm font-semibold text-gray-900 sm:pl-0">ID</div>
@@ -174,17 +174,17 @@ templ UsersList(tableData map[int]Item, updateID *int) {
 			<div class="table-cell px-3 py-3.5 text-sm font-semibold text-gray-900">State</div>
 			<div class="table-cell px-3 py-3.5 text-sm font-semibold text-gray-900">Actions</div>
 		</div>
-		for _, row := range tableData {
+		for _, row := range usersData {
 			if (updateID != nil && *updateID == row.ID) {
-				@TableInputRow(row)
+				@UserInputRow(row)
 			} else {
-				@TableRow(row, false)
+				@UserRow(row, false)
 			}
 		}
 	</div>
 }
 
-templ Table(page *Page, tableData map[int]Item, showModal bool, updateID *int) {
+templ Users(page *Page, usersData map[int]User, showModal bool, updateID *int) {
 	@Layout(page) {
 		<div class="px-4 py-4 mx-auto max-w-[1000px] sm:px-6 lg:px-8">
 			<div class="sm:flex sm:items-center">
@@ -205,7 +205,7 @@ templ Table(page *Page, tableData map[int]Item, showModal bool, updateID *int) {
 			<div class="mt-8 flow-root">
 				<div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
 					<div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-						@UsersList(tableData, updateID)
+						@UsersList(usersData, updateID)
 					</div>
 				</div>
 			</div>

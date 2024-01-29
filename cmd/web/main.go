@@ -25,14 +25,14 @@ func main() {
 	e.GET("/", app.Home)
 	e.GET("/about", app.About)
 
-	e.GET("/users", app.TablePage)
+	e.GET("/users", app.UsersPage)
 
 	e.POST("/users", app.CreateRow)
 	e.PUT("/users", app.UpdateRow)
 	e.DELETE("/users", app.DeleteRow)
 
-	e.DELETE("/users/new", app.CloseModal)
-	e.GET("/users/new", app.ShowModal)
+	e.DELETE("/users/new", app.CloseAddUserModal)
+	e.GET("/users/new", app.ShowAddUserModal)
 
 	e.GET("/users/update/:id", app.OpenUpdateRow)
 	e.POST("/users/update/:id", app.CancelUpdate)

@@ -11,13 +11,13 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-var tableData map[int]templates.Item
+var usersData map[int]templates.User
 var id int
 
 func addData() {
 	id = 0
-	tableData = make(map[int]templates.Item)
-	tableData[id] = templates.Item{
+	usersData = make(map[int]templates.User)
+	usersData[id] = templates.User{
 		ID:    id,
 		Name:  "Dean",
 		Age:   28,
@@ -25,7 +25,7 @@ func addData() {
 		State: "NY",
 	}
 	id++
-	tableData[id] = templates.Item{
+	usersData[id] = templates.User{
 		ID:    id,
 		Name:  "Sam",
 		Age:   26,
@@ -35,7 +35,7 @@ func addData() {
 	id++
 }
 
-func (a *App) TablePage(c echo.Context) error {
+func (a *App) UsersPage(c echo.Context) error {
 	r := c.Request()
 	h := r.Context().Value(htmx.ContextRequestHeader).(htmx.HxRequestHeader)
 
@@ -45,7 +45,7 @@ func (a *App) TablePage(c echo.Context) error {
 	}
 	addData()
 
-	components := templates.Table(page, tableData, false, nil)
+	components := templates.Users(page, usersData, false, nil)
 	return components.Render(context.Background(), c.Response().Writer)
 }
 
@@ -60,7 +60,7 @@ func (a *App) CreateRow(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid Age"})
 	}
 
-	newItem := templates.Item{
+	newItem := templates.User{
 		ID:    id,
 		Name:  name,
 		Age:   ageInt,
@@ -69,9 +69,9 @@ func (a *App) CreateRow(c echo.Context) error {
 	}
 	id++
 
-	tableData[newItem.ID] = newItem
+	usersData[newItem.ID] = newItem
 
-	components := templates.TableRow(newItem, true)
+	components := templates.UserRow(newItem, true)
 	return components.Render(context.Background(), c.Response().Writer)
 }
 
@@ -93,7 +93,7 @@ func (a *App) UpdateRow(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid ID"})
 	}
 
-	if item, ok := tableData[idInt]; ok {
+	if item, ok := usersData[idInt]; ok {
 		if formName != "" && formName != item.Name {
 			item.Name = formName
 		}
@@ -110,9 +110,9 @@ func (a *App) UpdateRow(c echo.Context) error {
 			item.State = formState
 		}
 
-		tableData[idInt] = item
+		usersData[idInt] = item
 		c.Response().Header().Set("HX-Push-Url", "/users")
-		components := templates.TableRow(item, false)
+		components := templates.UserRow(item, false)
 		return components.Render(context.Background(), c.Response().Writer)
 	}
 
@@ -128,15 +128,15 @@ func (a *App) DeleteRow(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, "Invalid ID")
 	}
 
-	if _, ok := tableData[idInt]; ok {
-		delete(tableData, idInt)
+	if _, ok := usersData[idInt]; ok {
+		delete(usersData, idInt)
 		return c.JSON(http.StatusOK, map[string]string{"message": "Item deleted"})
 	}
 
 	return c.JSON(http.StatusNotFound, map[string]string{"error": "Item not found"})
 }
 
-func (a *App) ShowModal(c echo.Context) error {
+func (a *App) ShowAddUserModal(c echo.Context) error {
 	r := c.Request()
 	h := r.Context().Value(htmx.ContextRequestHeader).(htmx.HxRequestHeader)
 
@@ -147,11 +147,11 @@ func (a *App) ShowModal(c echo.Context) error {
 
 	var req = c.Request().Header.Get("HX-Request")
 	if req != "true" {
-		if len(tableData) == 0 {
+		if len(usersData) == 0 {
 			addData()
 		}
 
-		components := templates.Table(page, tableData, true, nil)
+		components := templates.Users(page, usersData, true, nil)
 		return components.Render(context.Background(), c.Response().Writer)
 	}
 
@@ -159,7 +159,7 @@ func (a *App) ShowModal(c echo.Context) error {
 	return components.Render(context.Background(), c.Response().Writer)
 }
 
-func (a *App) CloseModal(c echo.Context) error {
+func (a *App) CloseAddUserModal(c echo.Context) error {
 	c.Response().Header().Set("HX-Push-Url", "/users")
 	return c.NoContent(http.StatusOK)
 }
@@ -174,7 +174,7 @@ func (a *App) OpenUpdateRow(c echo.Context) error {
 	}
 	var req = c.Request().Header.Get("HX-Request")
 	if req != "true" {
-		if len(tableData) == 0 {
+		if len(usersData) == 0 {
 			addData()
 		}
 
@@ -183,11 +183,11 @@ func (a *App) OpenUpdateRow(c echo.Context) error {
 			Boosted: h.HxBoosted,
 		}
 
-		components := templates.Table(page, tableData, false, &idInt)
+		components := templates.Users(page, usersData, false, &idInt)
 		return components.Render(context.Background(), c.Response().Writer)
 	}
-	if _, ok := tableData[idInt]; ok {
-		components := templates.UsersList(tableData, &idInt)
+	if _, ok := usersData[idInt]; ok {
+		components := templates.UsersList(usersData, &idInt)
 		return components.Render(context.Background(), c.Response().Writer)
 	}
 	return c.JSON(http.StatusNotFound, map[string]string{"error": "Item not found"})
@@ -199,11 +199,10 @@ func (a *App) CancelUpdate(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, "Invalid ID")
 	}
-	if item, ok := tableData[idInt]; ok {
+	if item, ok := usersData[idInt]; ok {
 		c.Response().Header().Set("HX-Push-Url", "/users")
-		components := templates.TableRow(item, false)
+		components := templates.UserRow(item, false)
 		return components.Render(context.Background(), c.Response().Writer)
 	}
 	return c.JSON(http.StatusNotFound, map[string]string{"error": "Item update cancel failed"})
-
 }
