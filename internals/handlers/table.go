@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"go-htmx-templ-echo-template/internals/templates"
+	"sort"
 	"strconv"
 
 	"net/http"
@@ -15,9 +16,11 @@ var usersData map[int]templates.User
 var id int
 
 func addData() {
+	usersDataDummy := make(map[int]templates.User)
 	id = 0
 	usersData = make(map[int]templates.User)
-	usersData[id] = templates.User{
+
+	usersDataDummy[id] = templates.User{
 		ID:    id,
 		Name:  "Dean",
 		Age:   28,
@@ -25,7 +28,7 @@ func addData() {
 		State: "NY",
 	}
 	id++
-	usersData[id] = templates.User{
+	usersDataDummy[id] = templates.User{
 		ID:    id,
 		Name:  "Sam",
 		Age:   26,
@@ -33,6 +36,17 @@ func addData() {
 		State: "NY",
 	}
 	id++
+
+	keys := make([]int, 0, len(usersDataDummy))
+
+	for k := range usersDataDummy {
+		keys = append(keys, k)
+	}
+	sort.Ints(keys)
+	usersData = usersDataDummy
+	for _, k := range keys {
+		usersData[k] = usersDataDummy[k]
+	}
 }
 
 func (a *App) UsersPage(c echo.Context) error {
@@ -57,10 +71,10 @@ func (a *App) CreateRow(c echo.Context) error {
 
 	ageInt, err := strconv.Atoi(ageStr)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid Age"})
+		return generateMessage(c, "Invalid Age", "error")
 	}
 
-	newItem := templates.User{
+	newUser := templates.User{
 		ID:    id,
 		Name:  name,
 		Age:   ageInt,
@@ -69,9 +83,9 @@ func (a *App) CreateRow(c echo.Context) error {
 	}
 	id++
 
-	usersData[newItem.ID] = newItem
+	usersData[newUser.ID] = newUser
 
-	components := templates.UserRow(newItem, true)
+	components := templates.UserRow(newUser, true)
 	return components.Render(context.Background(), c.Response().Writer)
 }
 
@@ -85,39 +99,39 @@ func (a *App) UpdateRow(c echo.Context) error {
 	// Convert age to int
 	ageInt, err := strconv.Atoi(formAgeStr)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid Age"})
+		return generateMessage(c, "Invalid Age", "error")
 	}
 	// Convert ID to int
 	idInt, err := strconv.Atoi(id)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid ID"})
+		return generateMessage(c, "Invalid ID", "error")
 	}
 
-	if item, ok := usersData[idInt]; ok {
-		if formName != "" && formName != item.Name {
-			item.Name = formName
+	if user, ok := usersData[idInt]; ok {
+		if formName != "" && formName != user.Name {
+			user.Name = formName
 		}
 
-		if formAgeStr != "" && ageInt != item.Age {
-			item.Age = ageInt
+		if formAgeStr != "" && ageInt != user.Age {
+			user.Age = ageInt
 		}
 
-		if formCity != "" && formCity != item.City {
-			item.City = formCity
+		if formCity != "" && formCity != user.City {
+			user.City = formCity
 		}
 
-		if formState != "" && formState != item.State {
-			item.State = formState
+		if formState != "" && formState != user.State {
+			user.State = formState
 		}
 
-		usersData[idInt] = item
+		usersData[idInt] = user
 		c.Response().Header().Set("HX-Push-Url", "/users")
-		components := templates.UserRow(item, false)
+		components := templates.UserRow(user, false)
 		return components.Render(context.Background(), c.Response().Writer)
 	}
 
-	// If the item is not found, return 404 Not Found
-	return c.JSON(http.StatusNotFound, map[string]string{"error": "Item not found"})
+	// If the user is not found, return 404 Not Found
+	return generateMessage(c, "User not found", "error")
 }
 
 func (a *App) DeleteRow(c echo.Context) error {
@@ -130,10 +144,9 @@ func (a *App) DeleteRow(c echo.Context) error {
 
 	if _, ok := usersData[idInt]; ok {
 		delete(usersData, idInt)
-		return c.JSON(http.StatusOK, map[string]string{"message": "Item deleted"})
+		return c.JSON(http.StatusOK, map[string]string{"message": "User deleted"})
 	}
-
-	return c.JSON(http.StatusNotFound, map[string]string{"error": "Item not found"})
+	return generateMessage(c, "User not found", "error")
 }
 
 func (a *App) ShowAddUserModal(c echo.Context) error {
@@ -170,7 +183,7 @@ func (a *App) OpenUpdateRow(c echo.Context) error {
 	id := c.Param("id")
 	idInt, err := strconv.Atoi(id)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, "Invalid ID")
+		return generateMessage(c, "Invalid ID", "error")
 	}
 	var req = c.Request().Header.Get("HX-Request")
 	if req != "true" {
@@ -190,7 +203,8 @@ func (a *App) OpenUpdateRow(c echo.Context) error {
 		components := templates.UsersList(usersData, &idInt)
 		return components.Render(context.Background(), c.Response().Writer)
 	}
-	return c.JSON(http.StatusNotFound, map[string]string{"error": "Item not found"})
+
+	return generateMessage(c, "User not found", "error")
 }
 
 func (a *App) CancelUpdate(c echo.Context) error {
@@ -199,10 +213,19 @@ func (a *App) CancelUpdate(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, "Invalid ID")
 	}
-	if item, ok := usersData[idInt]; ok {
+	if user, ok := usersData[idInt]; !ok {
 		c.Response().Header().Set("HX-Push-Url", "/users")
-		components := templates.UserRow(item, false)
+		components := templates.UserRow(user, false)
 		return components.Render(context.Background(), c.Response().Writer)
 	}
-	return c.JSON(http.StatusNotFound, map[string]string{"error": "Item update cancel failed"})
+
+	return generateMessage(c, "User update cancel failed", "error")
+}
+
+func generateMessage(c echo.Context, message string, state string) error {
+	// c.Response().WriteHeader(http.StatusNotFound)
+	c.Response().Header().Set("HX-Reswap", "beforeend")
+	c.Response().Header().Set("HX-Retarget", "#messages")
+	components := templates.MessageItem(message, state)
+	return components.Render(context.Background(), c.Response().Writer)
 }
