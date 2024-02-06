@@ -2,51 +2,97 @@ package handlers
 
 import (
 	"context"
+	"database/sql"
+	"fmt"
 	"go-htmx-templ-echo-template/internals/templates"
-	"sort"
+	"os"
 	"strconv"
 
 	"net/http"
 
 	"github.com/donseba/go-htmx"
 	"github.com/labstack/echo/v4"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 var usersData map[int]templates.User
-var id int
+
+// var id int
+
+var db *sql.DB
 
 func addData() {
-	usersDataDummy := make(map[int]templates.User)
-	id = 0
+	os.Remove("./db/sqlite-database.db")
+
+	file, err := os.Create("./db/sqlite-database.db") // Create SQLite file
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	file.Close()
+	db, _ = sql.Open("sqlite3", "./db/sqlite-database.db")
+	// defer db.Close()
+	createTable(db)
+
+	insertUser(db, "Dean", 28, "New York", "NY")
+	insertUser(db, "Sam", 26, "New York", "NY")
+
+	row, err := db.Query("SELECT * FROM user ORDER BY ID")
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer row.Close()
+
 	usersData = make(map[int]templates.User)
 
-	usersDataDummy[id] = templates.User{
-		ID:    id,
-		Name:  "Dean",
-		Age:   28,
-		City:  "New York",
-		State: "NY",
-	}
-	id++
-	usersDataDummy[id] = templates.User{
-		ID:    id,
-		Name:  "Sam",
-		Age:   26,
-		City:  "New York",
-		State: "NY",
-	}
-	id++
+	for row.Next() {
+		var ID int
+		var Name string
+		var Age int
+		var City string
+		var State string
+		row.Scan(&ID, &Name, &Age, &City, &State)
 
-	keys := make([]int, 0, len(usersDataDummy))
+		newUser := templates.User{
+			ID:    ID,
+			Name:  Name,
+			Age:   Age,
+			City:  City,
+			State: State,
+		}
 
-	for k := range usersDataDummy {
-		keys = append(keys, k)
+		usersData[ID] = newUser
 	}
-	sort.Ints(keys)
-	usersData = usersDataDummy
-	for _, k := range keys {
-		usersData[k] = usersDataDummy[k]
-	}
+	// usersDataDummy := make(map[int]templates.User)
+	// id = 0
+	// usersData = make(map[int]templates.User)
+
+	// usersDataDummy[id] = templates.User{
+	// 	ID:    id,
+	// 	Name:  "Dean",
+	// 	Age:   28,
+	// 	City:  "New York",
+	// 	State: "NY",
+	// }
+	// id++
+	// usersDataDummy[id] = templates.User{
+	// 	ID:    id,
+	// 	Name:  "Sam",
+	// 	Age:   26,
+	// 	City:  "New York",
+	// 	State: "NY",
+	// }
+	// id++
+
+	// keys := make([]int, 0, len(usersDataDummy))
+
+	// for k := range usersDataDummy {
+	// 	keys = append(keys, k)
+	// }
+	// sort.Ints(keys)
+	// usersData = usersDataDummy
+	// for _, k := range keys {
+	// 	usersData[k] = usersDataDummy[k]
+	// }
 }
 
 func (a *App) UsersPage(c echo.Context) error {
@@ -74,14 +120,15 @@ func (a *App) CreateRow(c echo.Context) error {
 		return generateMessage(c, "Invalid Age", "error")
 	}
 
-	newUser := templates.User{
-		ID:    id,
-		Name:  name,
-		Age:   ageInt,
-		City:  city,
-		State: state,
+	err = insertUser(db, name, ageInt, city, state)
+	if err != nil {
+		return generateMessage(c, "Error creating user", "error")
 	}
-	id++
+
+	newUser, err := getLastUser(db)
+	if err != nil {
+		return generateMessage(c, "Error fetching user", "error")
+	}
 
 	usersData[newUser.ID] = newUser
 
@@ -90,7 +137,6 @@ func (a *App) CreateRow(c echo.Context) error {
 }
 
 func (a *App) UpdateRow(c echo.Context) error {
-	// Retrieve form values
 	id := c.FormValue("id")
 	formName := c.FormValue("name")
 	formAgeStr := c.FormValue("age")
@@ -124,13 +170,17 @@ func (a *App) UpdateRow(c echo.Context) error {
 			user.State = formState
 		}
 
+		err := updateUser(db, user)
+		if err != nil {
+			return generateMessage(c, "User update error", "error")
+		}
+
 		usersData[idInt] = user
 		c.Response().Header().Set("HX-Push-Url", "/users")
 		components := templates.UserRow(user, false)
 		return components.Render(context.Background(), c.Response().Writer)
 	}
 
-	// If the user is not found, return 404 Not Found
 	return generateMessage(c, "User not found", "error")
 }
 
@@ -143,6 +193,10 @@ func (a *App) DeleteRow(c echo.Context) error {
 	}
 
 	if _, ok := usersData[idInt]; ok {
+		err := deleteUser(db, idInt)
+		if err != nil {
+			return generateMessage(c, "User delete error", "error")
+		}
 		delete(usersData, idInt)
 		return c.JSON(http.StatusOK, map[string]string{"message": "User deleted"})
 	}
@@ -213,7 +267,7 @@ func (a *App) CancelUpdate(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, "Invalid ID")
 	}
-	if user, ok := usersData[idInt]; !ok {
+	if user, ok := usersData[idInt]; ok {
 		c.Response().Header().Set("HX-Push-Url", "/users")
 		components := templates.UserRow(user, false)
 		return components.Render(context.Background(), c.Response().Writer)
@@ -228,4 +282,53 @@ func generateMessage(c echo.Context, message string, state string) error {
 	c.Response().Header().Set("HX-Retarget", "#messages")
 	components := templates.MessageItem(message, state)
 	return components.Render(context.Background(), c.Response().Writer)
+}
+
+func createTable(db *sql.DB) {
+	createUserTableSQL := `CREATE TABLE user (
+		"ID" integer NOT NULL PRIMARY KEY AUTOINCREMENT,		
+		"Name" TEXT,
+		"Age" integer,
+		"City" TEXT,	
+		"State" TEXT
+	  );`
+
+	statement, err := db.Prepare(createUserTableSQL)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	statement.Exec()
+}
+
+func getLastUser(db *sql.DB) (templates.User, error) {
+	var user templates.User
+
+	query := "SELECT ID, Name, Age, City, State FROM user ORDER BY ID DESC LIMIT 1"
+
+	row := db.QueryRow(query)
+
+	err := row.Scan(&user.ID, &user.Name, &user.Age, &user.City, &user.State)
+	if err != nil {
+		return user, err
+	}
+
+	return user, nil
+}
+
+func insertUser(db *sql.DB, name string, age int, city string, state string) error {
+	insertUserSQL := `INSERT INTO user(name, age, city, state) VALUES (?, ?, ?, ?)`
+	_, err := db.Exec(insertUserSQL, name, age, city, state)
+	return err
+}
+
+func updateUser(db *sql.DB, user templates.User) error {
+	updateUserSQL := `UPDATE user SET Name=?, Age=?, City=?, State=? WHERE ID=?`
+	_, err := db.Exec(updateUserSQL, user.Name, user.Age, user.City, user.State, user.ID)
+	return err
+}
+
+func deleteUser(db *sql.DB, id int) error {
+	deleteUserSQL := `DELETE FROM user WHERE ID=?`
+	_, err := db.Exec(deleteUserSQL, id)
+	return err
 }

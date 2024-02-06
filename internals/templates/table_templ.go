@@ -44,7 +44,7 @@ func Modal() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</label> <input type=\"text\" name=\"name\" id=\"name\" class=\"mb-2 pl-2 block w-full rounded-md border-2 py-1.5 border-gray-400 py-1.5 text-gray-900\" placeholder=\"Your name\"> <label for=\"age\" class=\"block text-sm font-medium leading-6 text-gray-900\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</label> <input type=\"text\" name=\"name\" id=\"name\" class=\"mb-2 pl-2 block w-full rounded-md border-2 py-1.5 border-gray-400 py-1.5 text-gray-900\" placeholder=\"Your name\" autofocus> <label for=\"age\" class=\"block text-sm font-medium leading-6 text-gray-900\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -248,7 +248,7 @@ func UserInputRow(row User) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" class=\"w-full text-center text-sm font-medium text-gray-900 focus:outline-none\"></div><div class=\"table-cell p-1\"><input type=\"text\" name=\"name\" class=\"pl-2 w-full rounded-md border-2 py-1.5 border-gray-400\" placeholder=\"Name\" value=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" class=\"w-full text-center text-sm font-medium text-gray-900 focus:outline-none\"></div><div class=\"table-cell p-1\"><input type=\"text\" name=\"name\" class=\"pl-2 w-full rounded-md border-2 py-1.5 border-gray-400\" placeholder=\"Name\" autofocus value=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
