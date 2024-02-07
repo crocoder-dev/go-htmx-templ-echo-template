@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"fmt"
 	"go-htmx-templ-echo-template/internals/templates"
-	"os"
 	"strconv"
 
 	"net/http"
@@ -15,85 +14,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-var usersData map[int]templates.User
-
-// var id int
-
-var db *sql.DB
-
-func addData() {
-	os.Remove("./db/sqlite-database.db")
-
-	file, err := os.Create("./db/sqlite-database.db") // Create SQLite file
-	if err != nil {
-		fmt.Println(err.Error())
-	}
-	file.Close()
-	db, _ = sql.Open("sqlite3", "./db/sqlite-database.db")
-	// defer db.Close()
-	createTable(db)
-
-	insertUser(db, "Dean", 28, "New York", "NY")
-	insertUser(db, "Sam", 26, "New York", "NY")
-
-	row, err := db.Query("SELECT * FROM user ORDER BY ID")
-	if err != nil {
-		fmt.Println(err)
-	}
-	defer row.Close()
-
-	usersData = make(map[int]templates.User)
-
-	for row.Next() {
-		var ID int
-		var Name string
-		var Age int
-		var City string
-		var State string
-		row.Scan(&ID, &Name, &Age, &City, &State)
-
-		newUser := templates.User{
-			ID:    ID,
-			Name:  Name,
-			Age:   Age,
-			City:  City,
-			State: State,
-		}
-
-		usersData[ID] = newUser
-	}
-	// usersDataDummy := make(map[int]templates.User)
-	// id = 0
-	// usersData = make(map[int]templates.User)
-
-	// usersDataDummy[id] = templates.User{
-	// 	ID:    id,
-	// 	Name:  "Dean",
-	// 	Age:   28,
-	// 	City:  "New York",
-	// 	State: "NY",
-	// }
-	// id++
-	// usersDataDummy[id] = templates.User{
-	// 	ID:    id,
-	// 	Name:  "Sam",
-	// 	Age:   26,
-	// 	City:  "New York",
-	// 	State: "NY",
-	// }
-	// id++
-
-	// keys := make([]int, 0, len(usersDataDummy))
-
-	// for k := range usersDataDummy {
-	// 	keys = append(keys, k)
-	// }
-	// sort.Ints(keys)
-	// usersData = usersDataDummy
-	// for _, k := range keys {
-	// 	usersData[k] = usersDataDummy[k]
-	// }
-}
+var db, _ = sql.Open("sqlite3", "./db/sqlite-database.db")
 
 func (a *App) UsersPage(c echo.Context) error {
 	r := c.Request()
@@ -103,10 +24,12 @@ func (a *App) UsersPage(c echo.Context) error {
 		Title:   "Users demo",
 		Boosted: h.HxBoosted,
 	}
-	addData()
 
-	components := templates.Users(page, usersData, false, nil)
-	return components.Render(context.Background(), c.Response().Writer)
+	if users, err := getAllUsers(); err == nil {
+		components := templates.Users(page, users, false, nil)
+		return components.Render(context.Background(), c.Response().Writer)
+	}
+	return c.JSON(http.StatusInternalServerError, "Server Error")
 }
 
 func (a *App) CreateRow(c echo.Context) error {
@@ -120,19 +43,12 @@ func (a *App) CreateRow(c echo.Context) error {
 		return generateMessage(c, "Invalid Age", "error")
 	}
 
-	err = insertUser(db, name, ageInt, city, state)
+	user, err := insertUser(name, ageInt, city, state)
 	if err != nil {
 		return generateMessage(c, "Error creating user", "error")
 	}
 
-	newUser, err := getLastUser(db)
-	if err != nil {
-		return generateMessage(c, "Error fetching user", "error")
-	}
-
-	usersData[newUser.ID] = newUser
-
-	components := templates.UserRow(newUser, true)
+	components := templates.UserRow(user, true)
 	return components.Render(context.Background(), c.Response().Writer)
 }
 
@@ -153,7 +69,7 @@ func (a *App) UpdateRow(c echo.Context) error {
 		return generateMessage(c, "Invalid ID", "error")
 	}
 
-	if user, ok := usersData[idInt]; ok {
+	if user, err := getUserByID(idInt); err == nil {
 		if formName != "" && formName != user.Name {
 			user.Name = formName
 		}
@@ -170,12 +86,11 @@ func (a *App) UpdateRow(c echo.Context) error {
 			user.State = formState
 		}
 
-		err := updateUser(db, user)
+		err := updateUser(user)
 		if err != nil {
 			return generateMessage(c, "User update error", "error")
 		}
 
-		usersData[idInt] = user
 		c.Response().Header().Set("HX-Push-Url", "/users")
 		components := templates.UserRow(user, false)
 		return components.Render(context.Background(), c.Response().Writer)
@@ -192,12 +107,11 @@ func (a *App) DeleteRow(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, "Invalid ID")
 	}
 
-	if _, ok := usersData[idInt]; ok {
-		err := deleteUser(db, idInt)
+	if _, err := getUserByID(idInt); err == nil {
+		err := deleteUser(idInt)
 		if err != nil {
 			return generateMessage(c, "User delete error", "error")
 		}
-		delete(usersData, idInt)
 		return c.JSON(http.StatusOK, map[string]string{"message": "User deleted"})
 	}
 	return generateMessage(c, "User not found", "error")
@@ -212,13 +126,14 @@ func (a *App) ShowAddUserModal(c echo.Context) error {
 		Boosted: h.HxBoosted,
 	}
 
+	users, err := getAllUsers()
+	if err != nil {
+		return generateMessage(c, "SQL error", "error")
+	}
+
 	var req = c.Request().Header.Get("HX-Request")
 	if req != "true" {
-		if len(usersData) == 0 {
-			addData()
-		}
-
-		components := templates.Users(page, usersData, true, nil)
+		components := templates.Users(page, users, true, nil)
 		return components.Render(context.Background(), c.Response().Writer)
 	}
 
@@ -239,22 +154,25 @@ func (a *App) OpenUpdateRow(c echo.Context) error {
 	if err != nil {
 		return generateMessage(c, "Invalid ID", "error")
 	}
+	users, err := getAllUsers()
+	if err != nil {
+		return generateMessage(c, "SQL error", "error")
+	}
+
 	var req = c.Request().Header.Get("HX-Request")
 	if req != "true" {
-		if len(usersData) == 0 {
-			addData()
-		}
-
 		page := &templates.Page{
 			Title:   "Users demo",
 			Boosted: h.HxBoosted,
 		}
 
-		components := templates.Users(page, usersData, false, &idInt)
+		components := templates.Users(page, users, false, &idInt)
 		return components.Render(context.Background(), c.Response().Writer)
+
 	}
-	if _, ok := usersData[idInt]; ok {
-		components := templates.UsersList(usersData, &idInt)
+	if _, err := getUserByID(idInt); err == nil {
+		fmt.Println(err)
+		components := templates.UsersList(users, &idInt)
 		return components.Render(context.Background(), c.Response().Writer)
 	}
 
@@ -267,7 +185,7 @@ func (a *App) CancelUpdate(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, "Invalid ID")
 	}
-	if user, ok := usersData[idInt]; ok {
+	if user, err := getUserByID(idInt); err == nil {
 		c.Response().Header().Set("HX-Push-Url", "/users")
 		components := templates.UserRow(user, false)
 		return components.Render(context.Background(), c.Response().Writer)
@@ -284,50 +202,57 @@ func generateMessage(c echo.Context, message string, state string) error {
 	return components.Render(context.Background(), c.Response().Writer)
 }
 
-func createTable(db *sql.DB) {
-	createUserTableSQL := `CREATE TABLE user (
-		"ID" integer NOT NULL PRIMARY KEY AUTOINCREMENT,		
-		"Name" TEXT,
-		"Age" integer,
-		"City" TEXT,	
-		"State" TEXT
-	  );`
-
-	statement, err := db.Prepare(createUserTableSQL)
+func getAllUsers() ([]templates.User, error) {
+	rows, err := db.Query("SELECT ID, Name, Age, City, State FROM user ORDER BY ID")
 	if err != nil {
-		fmt.Println(err.Error())
+		return nil, err
 	}
-	statement.Exec()
+	defer rows.Close()
+
+	var users []templates.User
+	for rows.Next() {
+		var user templates.User
+		err := rows.Scan(&user.ID, &user.Name, &user.Age, &user.City, &user.State)
+		if err != nil {
+			return nil, err
+		}
+		users = append(users, user)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return users, nil
 }
 
-func getLastUser(db *sql.DB) (templates.User, error) {
+func getUserByID(id int) (templates.User, error) {
+	getUserSQL := `SELECT ID, Name, Age, City, State FROM user WHERE ID = ?`
 	var user templates.User
-
-	query := "SELECT ID, Name, Age, City, State FROM user ORDER BY ID DESC LIMIT 1"
-
-	row := db.QueryRow(query)
-
-	err := row.Scan(&user.ID, &user.Name, &user.Age, &user.City, &user.State)
+	err := db.QueryRow(getUserSQL, strconv.Itoa(id)).Scan(&user.ID, &user.Name, &user.Age, &user.City, &user.State)
 	if err != nil {
 		return user, err
+	}
+	return user, nil
+}
+
+func insertUser(name string, age int, city string, state string) (templates.User, error) {
+	insertUserSQL := `INSERT INTO user(name, age, city, state) VALUES (?, ?, ?, ?) RETURNING ID, Name, Age, City, State`
+	var user templates.User
+	err := db.QueryRow(insertUserSQL, name, age, city, state).Scan(&user.ID, &user.Name, &user.Age, &user.City, &user.State)
+	if err != nil {
+		return templates.User{}, err
 	}
 
 	return user, nil
 }
 
-func insertUser(db *sql.DB, name string, age int, city string, state string) error {
-	insertUserSQL := `INSERT INTO user(name, age, city, state) VALUES (?, ?, ?, ?)`
-	_, err := db.Exec(insertUserSQL, name, age, city, state)
-	return err
-}
-
-func updateUser(db *sql.DB, user templates.User) error {
+func updateUser(user templates.User) error {
 	updateUserSQL := `UPDATE user SET Name=?, Age=?, City=?, State=? WHERE ID=?`
 	_, err := db.Exec(updateUserSQL, user.Name, user.Age, user.City, user.State, user.ID)
 	return err
 }
 
-func deleteUser(db *sql.DB, id int) error {
+func deleteUser(id int) error {
 	deleteUserSQL := `DELETE FROM user WHERE ID=?`
 	_, err := db.Exec(deleteUserSQL, id)
 	return err

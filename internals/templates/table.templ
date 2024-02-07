@@ -135,7 +135,7 @@ templ MessageItem(text string, state string) {
 	}
 }
 
-templ UsersList(usersData map[int]User, updateID *int) {
+templ UsersList(usersData []User, updateID *int) {
 	<div id="users-list" class="table min-w-full border-collapse">
 		<div class="table-row text-center border-b border-gray-300">
 			<div class="table-cell py-3.5 pl-4 pr-3 text-sm font-semibold text-gray-900 sm:pl-0">ID</div>
@@ -155,7 +155,7 @@ templ UsersList(usersData map[int]User, updateID *int) {
 	</div>
 }
 
-templ Users(page *Page, usersData map[int]User, showModal bool, updateID *int) {
+templ Users(page *Page, usersData []User, showModal bool, updateID *int) {
 	@Layout(page) {
 		<div class="px-4 py-4 mx-auto max-w-[1000px] sm:px-6 lg:px-8">
 			<div class="sm:flex sm:items-center">
