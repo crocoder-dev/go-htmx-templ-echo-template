@@ -12,6 +12,23 @@ type User struct {
 	State string
 }
 
+script handleErrors() {
+	document.body.addEventListener("htmx:beforeSwap", function(event) {
+		console.log(event.detail.failed, event.detail.xhr.status, event.detail.xhr.statusText);
+		const xhr = event.detail.xhr;
+		if (xhr.status >= 400 && xhr.status <= 599) {
+			const messageEl = document.querySelector("#messages");
+			const html = event.detail.serverResponse;
+			const divEl = document.createElement("div");
+			divEl.innerHTML = html;
+			messageEl.appendChild(divEl);
+			setTimeout(() => {
+				messageEl.removeChild(divEl);
+			}, 2000)
+		}
+	});
+}
+
 templ Modal() {
 	<div id="modal" class="relative z-10" aria-labelledby="modal-title" role="dialog" aria-modal="true">
 		<div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
@@ -123,18 +140,6 @@ templ UserInputRow(row User) {
 	</form>
 }
 
-templ MessageItem(text string, state string) {
-	if state == "error" {
-		<div class="mt-2 px-3 py-1 rounded-lg text-white bg-red-500 text-white p-2 rounded-lg">
-			{ text } <button hx-delete="/users/notification" hx-target="closest div" hx-swap="delete">×</button>
-		</div>
-	} else if state == "success" {
-		<div class="mt-2 px-3 py-1 rounded-lg text-white bg-green-500 text-white p-2 rounded-lg">
-			{ text } <button hx-delete="/users/notification" hx-target="closest div" hx-swap="delete">×</button>
-		</div>
-	}
-}
-
 templ UsersList(usersData []User, updateID *int) {
 	<div id="users-list" class="table min-w-full border-collapse">
 		<div class="table-row text-center border-b border-gray-300">
@@ -187,5 +192,6 @@ templ Users(page *Page, usersData []User, showModal bool, updateID *int) {
 			}
 		</div>
 		<div id="messages" class="absolute top-0 left-2/4 translate-x-[-50%] z-20"></div>
+		@handleErrors()
 	}
 }

@@ -40,12 +40,12 @@ func (a *App) CreateRow(c echo.Context) error {
 
 	ageInt, err := strconv.Atoi(ageStr)
 	if err != nil {
-		return generateMessage(c, "Invalid Age", "error")
+		return generateMessage(c, "Invalid Age", "error", http.StatusBadRequest)
 	}
 
 	user, err := insertUser(name, ageInt, city, state)
 	if err != nil {
-		return generateMessage(c, "Error creating user", "error")
+		return generateMessage(c, "Error creating user", "error", http.StatusInternalServerError)
 	}
 
 	components := templates.UserRow(user, true)
@@ -61,12 +61,12 @@ func (a *App) UpdateRow(c echo.Context) error {
 	// Convert age to int
 	ageInt, err := strconv.Atoi(formAgeStr)
 	if err != nil {
-		return generateMessage(c, "Invalid Age", "error")
+		return generateMessage(c, "Invalid Age", "error", http.StatusBadRequest)
 	}
 	// Convert ID to int
 	idInt, err := strconv.Atoi(id)
 	if err != nil {
-		return generateMessage(c, "Invalid ID", "error")
+		return generateMessage(c, "Invalid ID", "error", http.StatusBadRequest)
 	}
 
 	if user, err := getUserByID(idInt); err == nil {
@@ -88,7 +88,7 @@ func (a *App) UpdateRow(c echo.Context) error {
 
 		err := updateUser(user)
 		if err != nil {
-			return generateMessage(c, "User update error", "error")
+			return generateMessage(c, "User update error", "error", http.StatusInternalServerError)
 		}
 
 		c.Response().Header().Set("HX-Push-Url", "/users")
@@ -96,7 +96,7 @@ func (a *App) UpdateRow(c echo.Context) error {
 		return components.Render(context.Background(), c.Response().Writer)
 	}
 
-	return generateMessage(c, "User not found", "error")
+	return generateMessage(c, "User not found", "error", http.StatusNotFound)
 }
 
 func (a *App) DeleteRow(c echo.Context) error {
@@ -104,17 +104,17 @@ func (a *App) DeleteRow(c echo.Context) error {
 
 	idInt, err := strconv.Atoi(id)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, "Invalid ID")
+		return generateMessage(c, "Invalid ID", "error", http.StatusBadRequest)
 	}
 
 	if _, err := getUserByID(idInt); err == nil {
 		err := deleteUser(idInt)
 		if err != nil {
-			return generateMessage(c, "User delete error", "error")
+			return generateMessage(c, "User delete error", "error", http.StatusInternalServerError)
 		}
 		return c.JSON(http.StatusOK, map[string]string{"message": "User deleted"})
 	}
-	return generateMessage(c, "User not found", "error")
+	return generateMessage(c, "User not found", "error", http.StatusNotFound)
 }
 
 func (a *App) ShowAddUserModal(c echo.Context) error {
@@ -128,7 +128,7 @@ func (a *App) ShowAddUserModal(c echo.Context) error {
 
 	users, err := getAllUsers()
 	if err != nil {
-		return generateMessage(c, "SQL error", "error")
+		return generateMessage(c, "SQL error", "error", http.StatusInternalServerError)
 	}
 
 	var req = c.Request().Header.Get("HX-Request")
@@ -152,11 +152,11 @@ func (a *App) OpenUpdateRow(c echo.Context) error {
 	id := c.Param("id")
 	idInt, err := strconv.Atoi(id)
 	if err != nil {
-		return generateMessage(c, "Invalid ID", "error")
+		return generateMessage(c, "Invalid ID", "error", http.StatusBadRequest)
 	}
 	users, err := getAllUsers()
 	if err != nil {
-		return generateMessage(c, "SQL error", "error")
+		return generateMessage(c, "SQL error", "error", http.StatusBadRequest)
 	}
 
 	var req = c.Request().Header.Get("HX-Request")
@@ -176,7 +176,7 @@ func (a *App) OpenUpdateRow(c echo.Context) error {
 		return components.Render(context.Background(), c.Response().Writer)
 	}
 
-	return generateMessage(c, "User not found", "error")
+	return generateMessage(c, "User not found", "error", http.StatusNotFound)
 }
 
 func (a *App) CancelUpdate(c echo.Context) error {
@@ -191,15 +191,11 @@ func (a *App) CancelUpdate(c echo.Context) error {
 		return components.Render(context.Background(), c.Response().Writer)
 	}
 
-	return generateMessage(c, "User update cancel failed", "error")
+	return generateMessage(c, "User update cancel failed", "error", http.StatusInternalServerError)
 }
 
-func generateMessage(c echo.Context, message string, state string) error {
-	// c.Response().WriteHeader(http.StatusNotFound)
-	c.Response().Header().Set("HX-Reswap", "beforeend")
-	c.Response().Header().Set("HX-Retarget", "#messages")
-	components := templates.MessageItem(message, state)
-	return components.Render(context.Background(), c.Response().Writer)
+func generateMessage(c echo.Context, message string, state string, status int) error {
+	return c.HTML(status, generateMessageHtml(message, state))
 }
 
 func getAllUsers() ([]templates.User, error) {
@@ -256,4 +252,12 @@ func deleteUser(id int) error {
 	deleteUserSQL := `DELETE FROM user WHERE ID=?`
 	_, err := db.Exec(deleteUserSQL, id)
 	return err
+}
+
+func generateMessageHtml(message string, state string) string {
+	if state == "error" {
+		return "<div class='mt-2 px-3 py-1 rounded-lg text-white bg-red-500 text-white p-2 rounded-lg'>" + message + "</div>"
+	} else {
+		return "<div class='mt-2 px-3 py-1 rounded-lg text-white bg-green-500 text-white p-2 rounded-lg'>" + message + "</div>"
+	}
 }
