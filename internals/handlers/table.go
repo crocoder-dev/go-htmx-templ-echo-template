@@ -14,8 +14,6 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-var db, _ = sql.Open("sqlite3", "./db/sqlite-database.db")
-
 func (a *App) UsersPage(c echo.Context) error {
 	r := c.Request()
 	h := r.Context().Value(htmx.ContextRequestHeader).(htmx.HxRequestHeader)
@@ -25,11 +23,14 @@ func (a *App) UsersPage(c echo.Context) error {
 		Boosted: h.HxBoosted,
 	}
 
-	if users, err := getAllUsers(); err == nil {
-		components := templates.Users(page, users, false, nil)
-		return components.Render(context.Background(), c.Response().Writer)
+	users, err := getAllUsers()
+
+	if err != nil {
+		return err
 	}
-	return c.JSON(http.StatusInternalServerError, "Server Error")
+
+	components := templates.Users(page, users, false, nil)
+	return components.Render(context.Background(), c.Response().Writer)
 }
 
 func (a *App) CreateRow(c echo.Context) error {
@@ -199,7 +200,7 @@ func generateMessage(c echo.Context, message string, state string, status int) e
 }
 
 func getAllUsers() ([]templates.User, error) {
-	rows, err := db.Query("SELECT ID, Name, Age, City, State FROM user ORDER BY ID")
+	rows, err := db.Query("SELECT id, name, age, city, state FROM users ORDER BY id")
 	if err != nil {
 		return nil, err
 	}
@@ -222,7 +223,7 @@ func getAllUsers() ([]templates.User, error) {
 }
 
 func getUserByID(id int) (templates.User, error) {
-	getUserSQL := `SELECT ID, Name, Age, City, State FROM user WHERE ID = ?`
+	getUserSQL := `SELECT id, name, age, city, state FROM users WHERE id = ?`
 	var user templates.User
 	err := db.QueryRow(getUserSQL, strconv.Itoa(id)).Scan(&user.ID, &user.Name, &user.Age, &user.City, &user.State)
 	if err != nil {
@@ -232,7 +233,7 @@ func getUserByID(id int) (templates.User, error) {
 }
 
 func insertUser(name string, age int, city string, state string) (templates.User, error) {
-	insertUserSQL := `INSERT INTO user(name, age, city, state) VALUES (?, ?, ?, ?) RETURNING ID, Name, Age, City, State`
+	insertUserSQL := `INSERT INTO users(name, age, city, state) VALUES (?, ?, ?, ?) RETURNING id, name, age, city, state`
 	var user templates.User
 	err := db.QueryRow(insertUserSQL, name, age, city, state).Scan(&user.ID, &user.Name, &user.Age, &user.City, &user.State)
 	if err != nil {
@@ -243,13 +244,13 @@ func insertUser(name string, age int, city string, state string) (templates.User
 }
 
 func updateUser(user templates.User) error {
-	updateUserSQL := `UPDATE user SET Name=?, Age=?, City=?, State=? WHERE ID=?`
+	updateUserSQL := `UPDATE users SET name=?, age=?, city=?, state=? WHERE id=?`
 	_, err := db.Exec(updateUserSQL, user.Name, user.Age, user.City, user.State, user.ID)
 	return err
 }
 
 func deleteUser(id int) error {
-	deleteUserSQL := `DELETE FROM user WHERE ID=?`
+	deleteUserSQL := `DELETE FROM users WHERE id=?`
 	_, err := db.Exec(deleteUserSQL, id)
 	return err
 }

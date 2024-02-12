@@ -5,16 +5,26 @@ import (
 	"go-htmx-templ-echo-template/internals/handlers"
 	"go-htmx-templ-echo-template/internals/templates"
 	"net/http"
+	"database/sql"
 
 	"github.com/donseba/go-htmx"
 	"github.com/labstack/echo/v4"
 	echoMiddleware "github.com/labstack/echo/v4/middleware"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 func main() {
+	var db, err = sql.Open("sqlite3", ":memory:")
+
+	if err != nil {
+		panic(err)
+	}
+
+	migrations := []string{}
 
 	app := &handlers.App{
 		HTMX: htmx.New(),
+		DB:   db,
 	}
 
 	e := echo.New()

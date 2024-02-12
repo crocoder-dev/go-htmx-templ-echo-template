@@ -5,16 +5,15 @@ import (
 )
 
 type User struct {
-	ID    int    
+	ID    int
 	Name  string
-	Age   int   
+	Age   int
 	City  string
 	State string
 }
 
 script handleErrors() {
 	document.body.addEventListener("htmx:beforeSwap", function(event) {
-		console.log(event.detail.failed, event.detail.xhr.status, event.detail.xhr.statusText);
 		const xhr = event.detail.xhr;
 		if (xhr.status >= 400 && xhr.status <= 599) {
 			const messageEl = document.querySelector("#messages");
@@ -169,7 +168,7 @@ templ Users(page *Page, usersData []User, showModal bool, updateID *int) {
 					<p class="mt-2 text-sm text-gray-700">A list of all the users in your account including their id, name, age, city and state.</p>
 				</div>
 				<div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
-					<button 
+					<button
 						hx-get="/users/new"
 						hx-target="#modal-holder"
 						hx-push-url="true"

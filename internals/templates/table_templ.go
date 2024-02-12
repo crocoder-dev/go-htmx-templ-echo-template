@@ -24,9 +24,8 @@ type User struct {
 
 func handleErrors() templ.ComponentScript {
 	return templ.ComponentScript{
-		Name: `__templ_handleErrors_da1f`,
-		Function: `function __templ_handleErrors_da1f(){document.body.addEventListener("htmx:beforeSwap", function(event) {
-		console.log(event.detail.failed, event.detail.xhr.status, event.detail.xhr.statusText);
+		Name: `__templ_handleErrors_d5a0`,
+		Function: `function __templ_handleErrors_d5a0(){document.body.addEventListener("htmx:beforeSwap", function(event) {
 		const xhr = event.detail.xhr;
 		if (xhr.status >= 400 && xhr.status <= 599) {
 			const messageEl = document.querySelector("#messages");
@@ -39,8 +38,8 @@ func handleErrors() templ.ComponentScript {
 			}, 2000)
 		}
 	});}`,
-		Call:       templ.SafeScript(`__templ_handleErrors_da1f`),
-		CallInline: templ.SafeScriptInline(`__templ_handleErrors_da1f`),
+		Call:       templ.SafeScript(`__templ_handleErrors_d5a0`),
+		CallInline: templ.SafeScriptInline(`__templ_handleErrors_d5a0`),
 	}
 }
 
