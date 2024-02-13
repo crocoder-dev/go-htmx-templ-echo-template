@@ -301,7 +301,7 @@ func UserInputRow(row User) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"></div><div class=\"table-cell pl-3\"><input type=\"button\" value=\"Cancel\" hx-post=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"></div><div class=\"table-cell pl-3 whitespace-nowrap\"><input type=\"button\" value=\"Cancel\" hx-post=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
