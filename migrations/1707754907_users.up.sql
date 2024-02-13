@@ -3,6 +3,6 @@ CREATE TABLE `users` (
 	`name` text NOT NULL,
 	`age` integer NOT NULL,
 	`city` text NOT NULL,
-	`state` text NOT NULL,
+	`state` text NOT NULL
 );
 

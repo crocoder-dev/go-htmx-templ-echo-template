@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"go-htmx-templ-echo-template/internals/templates"
 	"strconv"
@@ -23,7 +22,7 @@ func (a *App) UsersPage(c echo.Context) error {
 		Boosted: h.HxBoosted,
 	}
 
-	users, err := getAllUsers()
+	users, err := a.getAllUsers()
 
 	if err != nil {
 		return err
@@ -44,7 +43,7 @@ func (a *App) CreateRow(c echo.Context) error {
 		return generateMessage(c, "Invalid Age", "error", http.StatusBadRequest)
 	}
 
-	user, err := insertUser(name, ageInt, city, state)
+	user, err := a.insertUser(name, ageInt, city, state)
 	if err != nil {
 		return generateMessage(c, "Error creating user", "error", http.StatusInternalServerError)
 	}
@@ -70,7 +69,7 @@ func (a *App) UpdateRow(c echo.Context) error {
 		return generateMessage(c, "Invalid ID", "error", http.StatusBadRequest)
 	}
 
-	if user, err := getUserByID(idInt); err == nil {
+	if user, err := a.getUserByID(idInt); err == nil {
 		if formName != "" && formName != user.Name {
 			user.Name = formName
 		}
@@ -87,7 +86,7 @@ func (a *App) UpdateRow(c echo.Context) error {
 			user.State = formState
 		}
 
-		err := updateUser(user)
+		err := a.updateUser(user)
 		if err != nil {
 			return generateMessage(c, "User update error", "error", http.StatusInternalServerError)
 		}
@@ -108,8 +107,8 @@ func (a *App) DeleteRow(c echo.Context) error {
 		return generateMessage(c, "Invalid ID", "error", http.StatusBadRequest)
 	}
 
-	if _, err := getUserByID(idInt); err == nil {
-		err := deleteUser(idInt)
+	if _, err := a.getUserByID(idInt); err == nil {
+		err := a.deleteUser(idInt)
 		if err != nil {
 			return generateMessage(c, "User delete error", "error", http.StatusInternalServerError)
 		}
@@ -127,7 +126,7 @@ func (a *App) ShowAddUserModal(c echo.Context) error {
 		Boosted: h.HxBoosted,
 	}
 
-	users, err := getAllUsers()
+	users, err := a.getAllUsers()
 	if err != nil {
 		return generateMessage(c, "SQL error", "error", http.StatusInternalServerError)
 	}
@@ -155,7 +154,7 @@ func (a *App) OpenUpdateRow(c echo.Context) error {
 	if err != nil {
 		return generateMessage(c, "Invalid ID", "error", http.StatusBadRequest)
 	}
-	users, err := getAllUsers()
+	users, err := a.getAllUsers()
 	if err != nil {
 		return generateMessage(c, "SQL error", "error", http.StatusBadRequest)
 	}
@@ -171,7 +170,7 @@ func (a *App) OpenUpdateRow(c echo.Context) error {
 		return components.Render(context.Background(), c.Response().Writer)
 
 	}
-	if _, err := getUserByID(idInt); err == nil {
+	if _, err := a.getUserByID(idInt); err == nil {
 		fmt.Println(err)
 		components := templates.UsersList(users, &idInt)
 		return components.Render(context.Background(), c.Response().Writer)
@@ -186,7 +185,7 @@ func (a *App) CancelUpdate(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, "Invalid ID")
 	}
-	if user, err := getUserByID(idInt); err == nil {
+	if user, err := a.getUserByID(idInt); err == nil {
 		c.Response().Header().Set("HX-Push-Url", "/users")
 		components := templates.UserRow(user, false)
 		return components.Render(context.Background(), c.Response().Writer)
@@ -199,8 +198,8 @@ func generateMessage(c echo.Context, message string, state string, status int) e
 	return c.HTML(status, generateMessageHtml(message, state))
 }
 
-func getAllUsers() ([]templates.User, error) {
-	rows, err := db.Query("SELECT id, name, age, city, state FROM users ORDER BY id")
+func (a *App) getAllUsers() ([]templates.User, error) {
+	rows, err := a.DB.Query("SELECT id, name, age, city, state FROM users ORDER BY id")
 	if err != nil {
 		return nil, err
 	}
@@ -222,20 +221,20 @@ func getAllUsers() ([]templates.User, error) {
 	return users, nil
 }
 
-func getUserByID(id int) (templates.User, error) {
+func (a *App) getUserByID(id int) (templates.User, error) {
 	getUserSQL := `SELECT id, name, age, city, state FROM users WHERE id = ?`
 	var user templates.User
-	err := db.QueryRow(getUserSQL, strconv.Itoa(id)).Scan(&user.ID, &user.Name, &user.Age, &user.City, &user.State)
+	err := a.DB.QueryRow(getUserSQL, strconv.Itoa(id)).Scan(&user.ID, &user.Name, &user.Age, &user.City, &user.State)
 	if err != nil {
 		return user, err
 	}
 	return user, nil
 }
 
-func insertUser(name string, age int, city string, state string) (templates.User, error) {
+func (a *App) insertUser(name string, age int, city string, state string) (templates.User, error) {
 	insertUserSQL := `INSERT INTO users(name, age, city, state) VALUES (?, ?, ?, ?) RETURNING id, name, age, city, state`
 	var user templates.User
-	err := db.QueryRow(insertUserSQL, name, age, city, state).Scan(&user.ID, &user.Name, &user.Age, &user.City, &user.State)
+	err := a.DB.QueryRow(insertUserSQL, name, age, city, state).Scan(&user.ID, &user.Name, &user.Age, &user.City, &user.State)
 	if err != nil {
 		return templates.User{}, err
 	}
@@ -243,15 +242,15 @@ func insertUser(name string, age int, city string, state string) (templates.User
 	return user, nil
 }
 
-func updateUser(user templates.User) error {
+func (a *App) updateUser(user templates.User) error {
 	updateUserSQL := `UPDATE users SET name=?, age=?, city=?, state=? WHERE id=?`
-	_, err := db.Exec(updateUserSQL, user.Name, user.Age, user.City, user.State, user.ID)
+	_, err := a.DB.Exec(updateUserSQL, user.Name, user.Age, user.City, user.State, user.ID)
 	return err
 }
 
-func deleteUser(id int) error {
+func (a *App) deleteUser(id int) error {
 	deleteUserSQL := `DELETE FROM users WHERE id=?`
-	_, err := db.Exec(deleteUserSQL, id)
+	_, err := a.DB.Exec(deleteUserSQL, id)
 	return err
 }
 

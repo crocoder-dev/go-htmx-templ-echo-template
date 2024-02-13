@@ -2,10 +2,13 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"go-htmx-templ-echo-template/internals/handlers"
 	"go-htmx-templ-echo-template/internals/templates"
 	"net/http"
-	"database/sql"
+	"os"
+	"path/filepath"
+	"sort"
 
 	"github.com/donseba/go-htmx"
 	"github.com/labstack/echo/v4"
@@ -15,12 +18,15 @@ import (
 
 func main() {
 	var db, err = sql.Open("sqlite3", ":memory:")
-
 	if err != nil {
 		panic(err)
 	}
 
-	migrations := []string{}
+	migrationsDir := "./migrations"
+	err = applyMigrations(db, migrationsDir)
+	if err != nil {
+		panic(err)
+	}
 
 	app := &handlers.App{
 		HTMX: htmx.New(),
@@ -52,6 +58,29 @@ func main() {
 	e.Static("/", "dist")
 
 	e.Logger.Fatal(e.Start(":3000"))
+}
+
+func applyMigrations(db *sql.DB, migrationsDir string) error {
+	migrationFiles, err := filepath.Glob(filepath.Join(migrationsDir, "*.up.sql"))
+	if err != nil {
+		return err
+	}
+
+	sort.Strings(migrationFiles)
+
+	for _, migrationFile := range migrationFiles {
+		content, err := os.ReadFile(migrationFile)
+		if err != nil {
+			return err
+		}
+
+		_, err = db.Exec(string(content))
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func HTTPErrorHandler(err error, c echo.Context) {
