@@ -39,7 +39,6 @@ func main() {
 	e.Use(HtmxMiddleware)
 
 	e.GET("/", app.Home)
-	e.GET("/about", app.About)
 
 	e.GET("/users", app.UsersPage)
 
