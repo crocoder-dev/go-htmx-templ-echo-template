@@ -1,0 +1,196 @@
+package templates
+
+import (
+	"strconv"
+)
+
+type User struct {
+	ID    int
+	Name  string
+	Age   int
+	City  string
+	State string
+}
+
+script handleErrors() {
+	document.body.addEventListener("htmx:beforeSwap", function(event) {
+		const xhr = event.detail.xhr;
+		if (xhr.status >= 400 && xhr.status <= 599) {
+			const messageEl = document.querySelector("#messages");
+			const html = event.detail.serverResponse;
+			const divEl = document.createElement("div");
+			divEl.innerHTML = html;
+			messageEl.appendChild(divEl);
+			setTimeout(() => {
+				messageEl.removeChild(divEl);
+			}, 2000)
+		}
+	});
+}
+
+templ Modal() {
+	<div id="modal" class="relative z-10" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+		<div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+		<div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+			<div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+				<div class="relative transform overflow-hidden rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6">
+					<form hx-post="/users" hx-target="#users-list" hx-swap="beforeend" hx-boost="true" hx-push-url="true" class="flex flex-col">
+						<label for="name" class="block text-sm font-medium leading-6 text-gray-900">Name</label>
+						<input type="text" name="name" id="name" class="mb-2 pl-2 block w-full rounded-md border-2 py-1.5 border-gray-400 py-1.5 text-gray-900" placeholder="Your name" autofocus/>
+						<label for="age" class="block text-sm font-medium leading-6 text-gray-900">Age</label>
+						<input type="number" name="age" id="age" class="mb-2 pl-2 block w-full rounded-md border-2 py-1.5 border-gray-400 py-1.5 text-gray-900" placeholder="Your age"/>
+						<label for="city" class="block text-sm font-medium leading-6 text-gray-900">City</label>
+						<input type="text" name="city" id="city" class="mb-2 pl-2 block w-full rounded-md border-2 py-1.5 border-gray-400 py-1.5 text-gray-900" placeholder="Your city"/>
+						<label for="state" class="block text-sm font-medium leading-6 text-gray-900">State</label>
+						<input type="text" name="state" id="state" class="mb-2 pl-2 block w-full rounded-md border-2 py-1.5 border-gray-400 py-1.5 text-gray-900" placeholder="Your state"/>
+						<div class="mt-5 sm:mt-6 sm:grid sm:grid-flow-row-dense sm:grid-cols-2 sm:gap-3">
+							<input type="submit" value="Add user" class="inline-flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 sm:col-start-2"/>
+							<input type="button" value="Cancel" hx-delete="/users/new" hx-target="#modal" hx-swap="delete" class="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:col-start-1 sm:mt-0"/>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+}
+
+templ UserRow(row User, removeModal bool) {
+	<div id={ "row-" + strconv.Itoa(row.ID) } class="table-row text-center border-b border-gray-300">
+		if removeModal {
+			<div hx-swap-oob="delete:#modal"></div>
+		}
+		<div class="table-cell whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-0">{ strconv.Itoa(row.ID) }</div>
+		<div class="table-cell whitespace-nowrap px-3 py-4 text-sm text-gray-500">{ row.Name }</div>
+		<div class="table-cell whitespace-nowrap px-3 py-4 text-sm text-gray-500">{ strconv.Itoa(row.Age) }</div>
+		<div class="table-cell whitespace-nowrap px-3 py-4 text-sm text-gray-500">{ row.City }</div>
+		<div class="table-cell whitespace-nowrap px-3 py-4 text-sm text-gray-500">{ row.State }</div>
+		<div class="table-cell whitespace-nowrap py-4 pl-3 pr-4 text-sm font-medium sm:pr-0">
+			<button hx-get={ "/users/update/" + strconv.Itoa(row.ID) } hx-swap="outerHTML" hx-push-url="true" hx-target="#users-list" class="text-indigo-600 mr-2 hover:text-indigo-900">Update</button>
+			<button hx-delete={ "/users?id=" + strconv.Itoa(row.ID) } hx-target={ "#row-" + strconv.Itoa(row.ID) } hx-swap="delete" class="text-red-600 hover:text-red-900">Delete</button>
+		</div>
+	</div>
+}
+
+templ UserInputRow(row User) {
+	<form
+		id={ "row-" + strconv.Itoa(row.ID) }
+		hx-put="/users"
+		hx-target={ "#row-" + strconv.Itoa(row.ID) }
+		hx-swap="outerHTML"
+		class="table-row m-0 text-center border-b border-gray-300"
+	>
+		<div class="table-cell pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-0">
+			<input
+				type="text"
+				name="id"
+				readonly
+				value={ strconv.Itoa(row.ID) }
+				class="w-full text-center text-sm font-medium text-gray-900 focus:outline-none"
+			/>
+		</div>
+		<div class="table-cell p-1">
+			<input
+				type="text"
+				name="name"
+				class="pl-2 w-full rounded-md border-2 py-1.5 border-gray-400"
+				placeholder="Name"
+				autofocus
+				value={ row.Name }
+			/>
+		</div>
+		<div class="table-cell p-1">
+			<input
+				type="number"
+				name="age"
+				class="pl-2 w-full rounded-md border-2 py-1.5 border-gray-400"
+				placeholder="Age"
+				value={ strconv.Itoa(row.Age) }
+			/>
+		</div>
+		<div class="table-cell p-1">
+			<input
+				type="text"
+				name="city"
+				class="pl-2 w-full rounded-md border-2 py-1.5 border-gray-400"
+				placeholder="City"
+				value={ row.City }
+			/>
+		</div>
+		<div class="table-cell p-1">
+			<input
+				type="text"
+				name="state"
+				class="pl-2 w-full rounded-md border-2 py-1.5 border-gray-400"
+				placeholder="State"
+				value={ row.State }
+			/>
+		</div>
+		<div class="table-cell pl-3 whitespace-nowrap">
+			<input
+				type="button"
+				value="Cancel"
+				hx-post={ "/users/update/" + strconv.Itoa(row.ID) }
+				hx-target={ "#row-" + strconv.Itoa(row.ID) }
+				hx-swap="outerHTML"
+				class="cursor-pointer text-gray-600 mr-2 hover:text-gray-900"
+			/>
+			<input type="submit" value="Save" class="cursor-pointer text-green-600 hover:text-green-900"/>
+		</div>
+	</form>
+}
+
+templ UsersList(usersData []User, updateID *int) {
+	<div id="users-list" class="table min-w-full border-collapse">
+		<div class="table-row text-center border-b border-gray-300">
+			<div class="table-cell py-3.5 pl-4 pr-3 text-sm font-semibold text-gray-900 sm:pl-0">ID</div>
+			<div class="table-cell px-3 py-3.5 text-sm font-semibold text-gray-900">Name</div>
+			<div class="table-cell px-3 py-3.5 text-sm font-semibold text-gray-900">Age</div>
+			<div class="table-cell px-3 py-3.5 text-sm font-semibold text-gray-900">City</div>
+			<div class="table-cell px-3 py-3.5 text-sm font-semibold text-gray-900">State</div>
+			<div class="table-cell px-3 py-3.5 text-sm font-semibold text-gray-900">Actions</div>
+		</div>
+		for _, row := range usersData {
+			if (updateID != nil && *updateID == row.ID) {
+				@UserInputRow(row)
+			} else {
+				@UserRow(row, false)
+			}
+		}
+	</div>
+}
+
+templ Users(page *Page, usersData []User, showModal bool, updateID *int) {
+	@Layout(page) {
+		<div class="px-4 py-4 mx-auto max-w-[1000px] sm:px-6 lg:px-8">
+			<div class="sm:flex sm:items-center">
+				<div class="sm:flex-auto">
+					<h1 class="text-base font-semibold leading-6 text-gray-900">Users</h1>
+					<p class="mt-2 text-sm text-gray-700">A list of all the users in your account including their id, name, age, city and state.</p>
+				</div>
+				<div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
+					<button
+						hx-get="/users/new"
+						hx-target="#modal-holder"
+						hx-push-url="true"
+						hx-trigger="click"
+						class="block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
+					>Add user</button>
+				</div>
+			</div>
+			<div class="mt-8 flow-root">
+				<div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+					<div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+						@UsersList(usersData, updateID)
+					</div>
+				</div>
+			</div>
+		</div>
+		<div id="modal-holder">
+			if showModal {
+				@Modal()
+			}
+		</div>
+		<div id="messages" class="absolute top-0 left-2/4 translate-x-[-50%] z-20"></div>
+		@handleErrors()
+	}
+}

@@ -1,0 +1,17 @@
+{
+  "name": "go-htmx-templ-echo-template",
+  "module": "index.ts",
+  "type": "module",
+  "scripts": {
+    "watch-build": "$(go env GOPATH)/bin/air & ./node_modules/.bin/tailwindcss -i ./style.css -o ./dist/style.css --watch"
+  },
+  "devDependencies": {
+    "bun-types": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "tailwindcss": "^3.3.3"
+  }
+}
